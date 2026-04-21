@@ -24,6 +24,7 @@ import { LanguageSelector } from './components/LanguageSelector';
 import { WeightOrderModal } from './components/WeightOrderModal';
 import { OptionSelector } from './components/OptionSelector';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useUnlockState } from '../../hooks/useUnlockState';
 
 const formatMoney = (value: number, currency = 'MXN') =>
   new Intl.NumberFormat('es-MX', {
@@ -143,17 +144,18 @@ export const MenuView = ({
   secondaryColor = '#ea580c',
 }: any) => {
   const { t, getItemDescription } = useTranslations();
+  const { isUnlocked } = useUnlockState();
   const categories = settings?.categories || [];
+  const LOCKED_CATS = ['gummies', 'candy', 'chocolate'];
   const [selectedCategory, setSelectedCategory] = React.useState(categories[0]?.code || 'promo');
   const [selectedWeightItem, setSelectedWeightItem] = React.useState<any>(null);
   const [showWeightModal, setShowWeightModal] = React.useState(false);
   const [showOptions, setShowOptions] = React.useState(false);
   const [selectedOptionItem, setSelectedOptionItem] = React.useState<any>(null);
   
-  // Filter categories to only show those that have items
-  const visibleCategories = categories.filter(cat =>
-    menuItems.some(item => item.category === cat.code)
-  );
+  const visibleCategories = isUnlocked
+    ? categories.filter(cat => menuItems.some(item => item.category === cat.code))
+    : categories.filter(cat => LOCKED_CATS.includes(cat.code) && menuItems.some(item => item.category === cat.code));
   
   // Update selected category if the current one has no items
   React.useEffect(() => {
@@ -161,6 +163,12 @@ export const MenuView = ({
       setSelectedCategory(visibleCategories[0].code);
     }
   }, [visibleCategories, selectedCategory]);
+  
+  React.useEffect(() => {
+    if (!visibleCategories.some(cat => cat.code === selectedCategory) && visibleCategories.length > 0) {
+      setSelectedCategory(visibleCategories[0].code);
+    }
+  }, [isUnlocked, visibleCategories, selectedCategory]);
   
   if (categories.length === 0) {
     return (
@@ -304,31 +312,33 @@ export const MenuView = ({
       />
 
       {/* Options Modal */}
-      <OptionSelector
-        options={selectedOptionItem?.options || []}
-        primaryColor={primaryColor}
-        onSelect={(option: any) => {
-          if (selectedOptionItem) {
-            const itemWithOption = {
-              ...selectedOptionItem,
-              quantity: 1,
-              selectedOption: option,
-              price: option.price,
-            };
-            setCart(prev => {
-              const existing = prev.find((i: any) => i.id === selectedOptionItem.id && i.selectedOption?.id === option.id);
-              if (existing) return prev.map((i: any) => i.id === selectedOptionItem.id && i.selectedOption?.id === option.id ? { ...i, quantity: i.quantity + 1 } : i);
-              return [...prev, itemWithOption];
-            });
+      {showOptions && selectedOptionItem && (
+        <OptionSelector
+          options={selectedOptionItem?.options || []}
+          primaryColor={primaryColor}
+          onSelect={(option: any) => {
+            if (selectedOptionItem) {
+              const itemWithOption = {
+                ...selectedOptionItem,
+                quantity: 1,
+                selectedOption: option,
+                price: option.price,
+              };
+              setCart(prev => {
+                const existing = prev.find((i: any) => i.id === selectedOptionItem.id && i.selectedOption?.id === option.id);
+                if (existing) return prev.map((i: any) => i.id === selectedOptionItem.id && i.selectedOption?.id === option.id ? { ...i, quantity: i.quantity + 1 } : i);
+                return [...prev, itemWithOption];
+              });
+              setShowOptions(false);
+              setSelectedOptionItem(null);
+            }
+          }}
+          onClose={() => {
             setShowOptions(false);
             setSelectedOptionItem(null);
-          }
-        }}
-        onClose={() => {
-          setShowOptions(false);
-          setSelectedOptionItem(null);
-        }}
-      />
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -359,13 +369,39 @@ export const CheckoutView = ({
   secondaryColor = '#ea580c',
 }: any) => {
   const { t } = useTranslations();
+  const { isUnlocked, disclaimerAccepted, acceptDisclaimer, unlock } = useUnlockState();
+  const [showDisclaimerModal, setShowDisclaimerModal] = React.useState(false);
+  
+  const UNLOCK_COMBO = [
+    { itemId: 'gom-1', count: 2 },
+    { itemId: 'dul-1', count: 1 },
+    { itemId: 'cho-1', count: 1 },
+  ];
+  
+  const isUnlockOrder = React.useMemo(() => {
+    if (isUnlocked) return false;
+    const cartByItemId: Record<string, number> = {};
+    cart.forEach((item: any) => {
+      const id = item.id || 'unknown';
+      cartByItemId[id] = (cartByItemId[id] || 0) + (item.quantity || 1);
+    });
+    return UNLOCK_COMBO.every(req => cartByItemId[req.itemId] === req.count);
+  }, [cart, isUnlocked]);
+  
+  const unlockDiscount = React.useMemo(() => {
+    if (!isUnlockOrder) return 0;
+    return cart
+      .filter((item: any) => UNLOCK_COMBO.some(req => req.itemId === item.id))
+      .reduce((sum: number, item: any) => sum + (item.price || 0) * (item.quantity || 1), 0);
+  }, [cart, isUnlockOrder]);
+  
   const recommended = (menuItems ?? []).filter(
     item =>
       item.category !== 'pollo' &&
       !cart.some((cartItem: any) => cartItem.id === item.id)
   );
 
-  const finalTotal = cartTotal + (deliveryType === 'domicilio' ? deliveryFee : 0);
+  const finalTotal = Math.max(0, cartTotal + (deliveryType === 'domicilio' ? deliveryFee : 0) - unlockDiscount);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -660,7 +696,58 @@ export const CheckoutView = ({
         >
           {t('confirmOrderPrefix', settings?.uiText?.confirmOrderPrefix || 'CONFIRMAR PEDIDO')} {formatMoney(finalTotal, currency)}
         </button>
+        
+        {isUnlockOrder && !disclaimerAccepted && (
+          <button
+            onClick={() => setShowDisclaimerModal(true)}
+            className="w-full mt-3 py-3 bg-amber-100 border-2 border-amber-400 text-amber-800 rounded-xl font-black uppercase text-sm animate-[pulse_2s_ease-in-out_infinite]"
+          >
+            ⚠️ Ver Aviso de Desbloqueo
+          </button>
+        )}
       </div>
+      
+      {showDisclaimerModal && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-4 max-w-lg w-full max-h-[85vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-black uppercase italic text-center flex-1">Aviso Importante</h3>
+              <button onClick={() => setShowDisclaimerModal(false)} className="text-gray-400">✕</button>
+            </div>
+            <div className="text-xs text-gray-600 mb-4 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-line">
+              {settings?.disclaimer_text || 'AVISO IMPORTANTE Y DISCLAIMER COMPLETO\n\nEste producto está destinado exclusivamente a adultos mayores de 18 años.\n\n1. RESPONSABILIDAD DEL CONSUMIDOR\nEl consumidor es responsable de conocer su tolerancia personal antes de consumir cualquier producto. Comenzar con dosis pequeñas y esperar el efecto antes de tomar más.\n\n2. EFECTOS PSICOLÓGICOS\n- Alucinaciones y alteraciones de la percepción\n- Cambios en el estado de ánimo\n- Sensaciones intensificadas de amor y conexión\n- Ansiedad, paranoia o pánico en algunos usuarios\n- Depresión o pensamientos negativos\n\n3. EFECTOS FÍSICOS\n- Aumento del ritmo cardíaco\n- Boca seca (cottonmouth)\n- Ojos rojos\n- Presión arterial elevada o baja\n- Náusea y vómitos\n- Mareos y desorientación\n- Dolores de cabeza\n\n4. INTERACCIONES Y CONTRAINDICACIONES\n- NO consumir si está embarazada o amamantando\n- NO operar vehículos o maquinaria pesada\n- NO mezclar con alcohol\n- NO combinar con medicamentos sin consultar a un médico\n- Consultar a un médico si tiene condiciones cardíacas, mentales o de salud general\n\n5. RIESGO DE ADICCIÓN\nEl uso excesivo puede llevar a dependencia psicológica y tolerancia. Usar con moderación.\n\n6. CALIDAD Y ALMACENAMIENTO\nLos productos deben almacenarse en lugar fresco, seco y oscuro. Mantener fuera del alcance de niños y mascotas.\n\n7. LEGALIDAD\nEl usuario es responsable de conocer las leyes locales respecto a la tenencia y consumo de estos productos.\n\n7.A. GOMITAS Y EDIBLES\nPueden tardar 1-2 horas en hacer efecto. El efecto puede durar 4-8 horas. Comenzar con 1/4 o 1/2 porción.\n\n7.B. CHOCOLATE Y CONCENTRADOS\nEfecto más rápido que edibles. Usar con precaución.\n\n7.C. HONGOS (MAGIC MUSHROOMS)\nAlucinógenos naturales. Efectos fuertes sobre la percepción. Usar en entorno seguro.\n\n7.D. LSD Y MICRODOSIS\nPotente alucinógeno. Efectos prolongados (8-12 horas). Preparar espacio seguro.\n\n7.E. MDMA Y ESTIMULANTES\nRiesgo de deshidratación. Hidratarse pero no en exceso. No mezclar con otras sustancias.\n\n7.F. PRODUCTOS DE CANNABIS\nEfecto sedante o eufórico según cepa. No conducir. May causa hambre (munchies).\n\n7.G. PREROLLS Y CONCENTRADOS\nPara usuarios con experiencia. Efecto inmediato al fumar/vapear.\n\n\nAL CONSUMIR, USTED EXPRESAMENTE LIBERA A ESTA EMPRESA DE CUALQUIER RESPONSABILIDAD POR DAÑOS FÍSICOS, PSICOLÓGICOS O LEGALES RESULTANTES DEL USO DE ESTOS PRODUCTOS.'}
+            </div>
+            <button
+              onClick={() => {
+                acceptDisclaimer(customerInfo?.name);
+                setShowDisclaimerModal(false);
+              }}
+              className="w-full py-3 bg-green-600 text-white rounded-xl font-black uppercase italic"
+            >
+              Acepto y Entiendo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {isUnlockOrder && disclaimerAccepted && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full text-center">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-black uppercase italic mb-2">¡Desbloqueado!</h3>
+            <p className="text-sm text-gray-600 mb-6">Has desbloqueado el menu completo.</p>
+            <button
+              onClick={() => {
+                setCart([]);
+                setActiveScreen('menu');
+              }}
+              className="w-full py-3 bg-black text-white rounded-xl font-black uppercase italic animate-pulse"
+            >
+              Volver al Menu
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

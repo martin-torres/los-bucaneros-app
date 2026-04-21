@@ -9,7 +9,10 @@ export type OrderStatus =
 
 export type PaymentMethod = 'efectivo' | 'tarjeta' | 'transferencia' | 'conekta' | 'mercadopago' | 'codi';
 export type DeliveryType = 'domicilio' | 'sucursal';
-export type MenuCategory = 'pollo' | 'complemento' | 'bebida' | 'promo' | 'especialidades';
+export type MenuCategory = 
+  | 'gummies' | 'candy' | 'chocolate' | 'drinks' | 'present'
+  | 'greenhouse_premium' | 'greenhouse_selecta' | 'living_soil' | 'hydro'
+  | 'edibles' | 'prerolls' | 'infusionados' | 'hash_holes' | 'extractos' | 'vapes' | 'psicodelia';
 
 export interface PromoItem {
   id: string;
@@ -32,6 +35,8 @@ export interface MenuItem {
   weightPricePerKg?: number;
   weightInGrams?: number;
   options?: ItemOption[];
+  strain?: 'sativa' | 'indica' | 'hybrid';
+  soldOut?: boolean;
 }
 
 export interface ItemOption {

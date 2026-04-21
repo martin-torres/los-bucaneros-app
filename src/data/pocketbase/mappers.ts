@@ -20,15 +20,31 @@ const asBoolean = (value: unknown, fallback = false): boolean => {
   return fallback;
 };
 
+const asJson = <T>(value: unknown, fallback: T): T => {
+  if (value === undefined) return fallback;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  if (typeof value === 'object' && value !== null) return value as T;
+  return fallback;
+};
+
 export const toMenuItem = (record: RawRecord): MenuItem => ({
   id: record.id,
   name: asString(record.name),
   description: asString(record.description),
   price: asNumber(record.price),
-  category: (asString(record.category) || 'pollo') as MenuItem['category'],
+  category: (asString(record.category) || 'gummies') as MenuItem['category'],
   image: asString(record.image),
   isWeightBased: asBoolean(record.isWeightBased),
   weightPricePerKg: record.weightPricePerKg === undefined ? undefined : asNumber(record.weightPricePerKg),
+  options: asJson(record.options, undefined),
+  strain: asString(record.strain, undefined) as 'sativa' | 'indica' | 'hybrid' | undefined,
+  soldOut: record.soldOut === 1 ? true : asBoolean(record.soldOut),
 });
 
 export const toPromoItem = (record: RawRecord): PromoItem => ({

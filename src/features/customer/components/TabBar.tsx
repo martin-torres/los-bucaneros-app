@@ -1,6 +1,25 @@
 import React from 'react';
 import { useTranslations } from '../../../hooks/useTranslations';
 
+const CATEGORY_ICONS: Record<string, string> = {
+  gummies: '🍬',
+  candy: '🧁',
+  chocolate: '🍫',
+  drinks: '🥤',
+  present: '🎁',
+  greenhouse_premium: '🌲',
+  greenhouse_selecta: '🌿',
+  living_soil: '🌱',
+  hydro: '💧',
+  edibles: '🍪',
+  prerolls: '🎋',
+  infusionados: '🧴',
+  hash_holes: '🍩',
+  extractos: '💎',
+  vapes: '💨',
+  psicodelia: '🍄',
+};
+
 interface TabBarProps {
   categories: Array<{ code: string; displayName: string }>;
   selectedCategory: string;
@@ -16,29 +35,29 @@ export const TabBar: React.FC<TabBarProps> = ({
 }) => {
   const { getCategoryName } = useTranslations();
   
-  // Gracefully handle empty categories - return nothing instead of crashing
   if (!categories || categories.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar -mx-6 px-6">
+    <div className="flex flex-wrap gap-2 pb-4 -mx-2 px-2">
       {categories.map((category) => (
         <button
           key={category.code}
           onClick={() => onSelectCategory(category.code)}
-          className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all ${
             selectedCategory === category.code
-              ? 'text-white shadow-md'
-              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+              ? 'text-white shadow-md scale-105'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
           }`}
           style={
             selectedCategory === category.code
               ? { backgroundColor: primaryColor }
-              : undefined
+              : { backgroundColor: '#f3f4f6' }
           }
         >
-          {getCategoryName(category.code, category.displayName)}
+          <span className="text-base">{CATEGORY_ICONS[category.code] || '📦'}</span>
+          <span>{getCategoryName(category.code, category.displayName)}</span>
         </button>
       ))}
     </div>
