@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#f59e0b">
-    <meta name="description" content="Restaurant ordering app">
+    <meta name="theme-color" id="theme-color" content="#f59e0b">
+    <meta name="description" content="El Arrocito - Restaurant ordering app">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Restaurant App">
-    <title>Restaurant App</title>
+    <meta name="apple-mobile-web-app-title" content="El Arrocito">
+    <title id="app-title">La Dulceria de Lalo</title>
+    <meta name="apple-mobile-web-app-title" content="La Dulceria de Lalo">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="/pwa-192x192.png">
     <link rel="apple-touch-icon" href="/pwa-192x192.png">
@@ -36,7 +37,7 @@
           border-color: #ef4444 !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/index-C5Cys5IT.js"></script>
+  <script type="module" crossorigin src="/assets/index--JeKsuS7.js"></script>
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 <body>
     <div id="root"></div>
@@ -53,6 +54,18 @@
                     });
             });
         }
+
+        // Dynamic theme color from localStorage (set by React app)
+        (function() {
+            const storedColor = localStorage.getItem('theme-primary-color');
+            if (storedColor) {
+                document.getElementById('theme-color').setAttribute('content', storedColor);
+            }
+            const storedTitle = localStorage.getItem('theme-app-title');
+            if (storedTitle) {
+                document.getElementById('app-title').textContent = storedTitle;
+            }
+        })();
     </script>
 </body>
 </html>

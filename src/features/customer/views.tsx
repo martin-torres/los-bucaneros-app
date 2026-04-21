@@ -372,7 +372,7 @@ export const CheckoutView = ({
   const { isUnlocked, disclaimerAccepted, acceptDisclaimer, unlock } = useUnlockState();
   const [showDisclaimerModal, setShowDisclaimerModal] = React.useState(false);
   
-  const UNLOCK_COMBO = [
+  const dbCombo = settings?.unlock_combo || [
     { itemId: 'gom-1', count: 2 },
     { itemId: 'dul-1', count: 1 },
     { itemId: 'cho-1', count: 1 },
@@ -385,15 +385,15 @@ export const CheckoutView = ({
       const id = item.id || 'unknown';
       cartByItemId[id] = (cartByItemId[id] || 0) + (item.quantity || 1);
     });
-    return UNLOCK_COMBO.every(req => cartByItemId[req.itemId] === req.count);
-  }, [cart, isUnlocked]);
+    return dbCombo.every((req: any) => cartByItemId[req.itemId] === req.count);
+  }, [cart, isUnlocked, dbCombo]);
   
   const unlockDiscount = React.useMemo(() => {
     if (!isUnlockOrder) return 0;
     return cart
-      .filter((item: any) => UNLOCK_COMBO.some(req => req.itemId === item.id))
+      .filter((item: any) => dbCombo.some((req: any) => req.itemId === item.id))
       .reduce((sum: number, item: any) => sum + (item.price || 0) * (item.quantity || 1), 0);
-  }, [cart, isUnlockOrder]);
+  }, [cart, isUnlockOrder, dbCombo]);
   
   const recommended = (menuItems ?? []).filter(
     item =>
@@ -731,16 +731,13 @@ export const CheckoutView = ({
       )}
       
       {isUnlockOrder && disclaimerAccepted && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full text-center">
+        <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-6" onClick={() => { setCart([]); setActiveScreen('menu'); }}>
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full text-center" onClick={(e) => e.stopPropagation()}>
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-black uppercase italic mb-2">¡Desbloqueado!</h3>
             <p className="text-sm text-gray-600 mb-6">Has desbloqueado el menu completo.</p>
             <button
-              onClick={() => {
-                setCart([]);
-                setActiveScreen('menu');
-              }}
+              onClick={() => { setCart([]); setActiveScreen('menu'); }}
               className="w-full py-3 bg-black text-white rounded-xl font-black uppercase italic animate-pulse"
             >
               Volver al Menu
