@@ -9,7 +9,7 @@ primary_region = "iad"
 
 [mounts]
   source = "pb_data"
-  destination = "/pb/pb_data"
+  destination = "/pb_data"
 
 [http_service]
   internal_port = 8090
