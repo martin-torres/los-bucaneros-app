@@ -68,7 +68,13 @@ export const AdminModule = ({
     const correctPin = settings?.adminPin || '1234';
     if (pinInput === correctPin) {
       try {
-        const authed = await adminAuth('admin@elarrocito.com', 'ElArrocito2024!');
+        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || prompt('Admin email:') || '';
+        const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || prompt('Admin password:') || '';
+        if (!adminEmail || !adminPassword) {
+          setPinError('Credenciales no proporcionadas');
+          return;
+        }
+        const authed = await adminAuth(adminEmail, adminPassword);
         if (authed) {
           setIsAdmin(true);
           setPinError('');
