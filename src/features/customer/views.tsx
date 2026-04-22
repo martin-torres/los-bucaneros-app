@@ -738,7 +738,7 @@ export const CheckoutView = ({
             <h3 className="text-xl font-black uppercase italic mb-2">¡Desbloqueado!</h3>
             <p className="text-sm text-gray-600 mb-6">Has desbloqueado el menu completo.</p>
             <button
-              onClick={() => { setCart([]); setActiveScreen('menu'); }}
+              onClick={() => { setCart([]); unlock(); setActiveScreen('menu'); }}
               className="w-full py-3 bg-black text-white rounded-xl font-black uppercase italic animate-pulse"
             >
               Volver al Menu
