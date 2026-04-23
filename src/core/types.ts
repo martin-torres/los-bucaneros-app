@@ -87,6 +87,19 @@ export interface Order {
   sessionId?: string;
 }
 
+export interface VisitorRecord {
+  id: string;
+  ip: string;
+  userAgent?: string;
+  deviceType?: 'mobile' | 'desktop' | 'tablet';
+  isPwaInstalled?: boolean;
+  sessionId: string;
+  firstVisit: string;
+  lastVisit: string;
+  visitCount: number;
+  associatedOrders?: string[];
+}
+
 export interface CustomerInfo {
   name: string;
   address: string;
@@ -196,4 +209,5 @@ export interface AppSkinSettings {
     transferBankName?: string;
     transferAccountNumber?: string;
   };
+  visitorTrackingEnabled?: boolean;
 }

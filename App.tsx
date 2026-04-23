@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Order, OrderItem, MenuItem, OrderStatus, CustomerInfo, PromoItem, AppSkinSettings } from './types';
+import { Order, OrderItem, MenuItem, OrderStatus, CustomerInfo, PromoItem, AppSkinSettings, VisitorRecord } from './types';
 import { menuItemsApi, promosApi, ordersApi, settingsApi, subscribeToOrders } from './lib/pocketbase';
 import { useUrlMode } from './src/hooks/useUrlMode';
+import { useVisitorTracking } from './src/hooks/useVisitorTracking';
 import pb from './lib/pocketbase';
 import { calculateDeliveryFee, haversineKm } from './src/core/pricing';
 import { resolveUiSettings } from './src/core/uiSettings';
@@ -24,16 +25,17 @@ import {
 type ViewMode = 'customer' | 'admin' | 'data' | 'dashboard';
 type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
 
-const App: React.FC = () => {
-  // Phase 1: UI State Management
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [promos, setPromos] = useState<PromoItem[]>([]);
-  const [settings, setSettings] = useState<AppSkinSettings | null>(null);
-  const [settingsLoading, setSettingsLoading] = useState(true);
+  const App: React.FC = () => {
+    // Phase 1: UI State Management
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [promos, setPromos] = useState<PromoItem[]>([]);
+    const [settings, setSettings] = useState<AppSkinSettings | null>(null);
+    const [settingsLoading, setSettingsLoading] = useState(true);
+    const { visitor, visitorId, sessionId, associateVisitorWithOrder } = useVisitorTracking();
 
-  const ui = resolveUiSettings(settings);
+    const ui = resolveUiSettings(settings);
 
   useEffect(() => {
     setIsLoading(true);
@@ -274,15 +276,17 @@ const App: React.FC = () => {
       formData.append('timestamp', newOrderData.timestamp.toString());
       formData.append('statusTimestamps', JSON.stringify(newOrderData.statusTimestamps));
 
-      const newOrder = await pb.collection('orders').create(formData);
-      
-      setCurrentOrder(newOrder);
-      setCart([]);
-      setPayWithAmount('');
-      setTransferFile(null);
-      // RESET CUSTOMER INFO FOR NEXT ORDER
-      setCustomerInfo({ name: '', address: '', cardNumber: '', expiry: '', cvv: '' });
-      setActiveScreen('tracking');
+       const newOrder = await pb.collection('orders').create(formData);
+       
+       await associateVisitorWithOrder(newOrder.id);
+       
+       setCurrentOrder(newOrder);
+       setCart([]);
+       setPayWithAmount('');
+       setTransferFile(null);
+       // RESET CUSTOMER INFO FOR NEXT ORDER
+       setCustomerInfo({ name: '', address: '', cardNumber: '', expiry: '', cvv: '' });
+       setActiveScreen('tracking');
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Error al crear orden. Por favor intenta de nuevo.');
