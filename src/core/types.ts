@@ -210,4 +210,7 @@ export interface AppSkinSettings {
     transferAccountNumber?: string;
   };
   visitorTrackingEnabled?: boolean;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
 }
