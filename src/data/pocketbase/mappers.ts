@@ -45,6 +45,8 @@ export const toMenuItem = (record: RawRecord): MenuItem => ({
   options: asJson(record.options, undefined),
   strain: asString(record.strain, undefined) as 'sativa' | 'indica' | 'hybrid' | undefined,
   soldOut: record.soldOut === 1 ? true : asBoolean(record.soldOut),
+  stock: record.stock === undefined ? undefined : asNumber(record.stock),
+  trackInventory: asBoolean(record.track_inventory),
 });
 
 export const toPromoItem = (record: RawRecord): PromoItem => ({

@@ -1,14 +1,14 @@
 {
-  "name": "el-arrocito-app-de-pedidos",
+  "name": "los-bucaneros-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "seed:settings": "node scripts/seed-restaurant-settings.js",
-    "seed:menu": "node scripts/seed-menu-items.js"
+    "seed:settings": "node scripts/seed-bucaneros-settings.js",
+    "seed:menu": "node scripts/seed-bucaneros-menu.js"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

@@ -167,9 +167,7 @@ export const MenuView = ({
   const [showOptions, setShowOptions] = React.useState(false);
   const [selectedOptionItem, setSelectedOptionItem] = React.useState<any>(null);
   
-  const visibleCategories = isUnlocked
-    ? categories.filter(cat => menuItems.some(item => item.category === cat.code))
-    : categories.filter(cat => LOCKED_CATS.includes(cat.code) && menuItems.some(item => item.category === cat.code));
+  const visibleCategories = categories.filter(cat => menuItems.some(item => item.category === cat.code));
   
   // Update selected category if the current one has no items
   React.useEffect(() => {
@@ -557,6 +555,13 @@ export const CheckoutView = ({
               className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
               value={customerInfo.name}
               onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+            />
+            <input 
+              type="tel" 
+              placeholder="Telefono (para confirmar tu pedido)"
+              className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
+              value={customerInfo.customerPhone || ''}
+              onChange={(e) => setCustomerInfo({...customerInfo, customerPhone: e.target.value})}
             />
             {deliveryType === 'domicilio' && (
               <input 

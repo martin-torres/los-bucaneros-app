@@ -1,4 +1,4 @@
-app = "dulceria-pocketbase"
+app = "los-bucaneros-pb"
 primary_region = "iad"
 
 [build]

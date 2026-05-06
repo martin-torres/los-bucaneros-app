@@ -48,6 +48,10 @@ export interface MenuItem {
   options?: ItemOption[];
   strain?: 'sativa' | 'indica' | 'hybrid';
   soldOut?: boolean;
+  /** Current stock count. -1 = unlimited (default). */
+  stock?: number;
+  /** Whether inventory tracking is enabled for this item. */
+  trackInventory?: boolean;
 }
 
 export interface ItemOption {
@@ -82,6 +86,7 @@ export interface Order {
   transferScreenshot?: string;
   deliveryDistanceKm?: number;
   deliveryFee?: number;
+  customerPhone?: string;
   timestamp: number;
   statusTimestamps: Partial<Record<OrderStatus, number>>;
   sessionId?: string;
@@ -106,6 +111,7 @@ export interface CustomerInfo {
   cardNumber: string;
   expiry: string;
   cvv: string;
+  customerPhone?: string;
 }
 
 export interface UiTextSettings {

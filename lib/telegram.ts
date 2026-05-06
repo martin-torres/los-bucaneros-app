@@ -45,6 +45,7 @@ function formatOrderMessage(order: Order, message: string = ''): string {
   let notification = `${emoji} *NUEVO PEDIDO*\n`;
   notification += `━━━━━━━━━━━━━━━━\n`;
   notification += `*Cliente:* ${order.customerName}\n`;
+  if (order.customerPhone) notification += `*Tel:* ${order.customerPhone}\n`;
   notification += `*Tipo:* ${order.customerAddress.includes('Paso por él') ? '🚀 Pickup' : '🏠 Delivery'}\n`;
   notification += `*Pago:* ${paymentMethodText[order.paymentMethod] || order.paymentMethod}\n`;
   notification += `*Total:* $${order.total} ${order.total > 0 ? 'MXN' : ''}\n`;

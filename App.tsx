@@ -44,7 +44,12 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
 
     menuItemsApi.getAll()
       .then(items => {
-        setMenuItems(items);
+        // Filter out inventory-tracked items with no stock
+        const filtered = items.filter(item => {
+          if (item.trackInventory && item.stock !== undefined && item.stock <= 0) return false;
+          return true;
+        });
+        setMenuItems(filtered);
       })
       .catch(() => {
         setError("Error al cargar el menú desde el servidor.");
@@ -118,7 +123,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   const [kitchenLoading, setKitchenLoading] = useState(true);
   const [switcherExpanded, setSwitcherExpanded] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: '', address: '', cardNumber: '', expiry: '', cvv: ''
+    name: '', address: '', cardNumber: '', expiry: '', cvv: '', customerPhone: ''
   });
 
   // Weight-based modal state
@@ -251,6 +256,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
         transferScreenshot: method === 'transferencia' ? transferFile : undefined,
         deliveryDistanceKm,
         deliveryFee,
+        customerPhone: customerInfo.customerPhone || undefined,
         timestamp: now,
         statusTimestamps: { recibido: now }
       };
@@ -274,6 +280,9 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
       if (newOrderData.deliveryFee !== undefined) {
         formData.append('deliveryFee', newOrderData.deliveryFee.toString());
       }
+      if (newOrderData.customerPhone) {
+        formData.append('customerPhone', newOrderData.customerPhone);
+      }
       formData.append('timestamp', newOrderData.timestamp.toString());
       formData.append('statusTimestamps', JSON.stringify(newOrderData.statusTimestamps));
 
@@ -293,7 +302,7 @@ const newOrder = await pb.collection('orders').create(formData);
        setPayWithAmount('');
        setTransferFile(null);
        // RESET CUSTOMER INFO FOR NEXT ORDER
-       setCustomerInfo({ name: '', address: '', cardNumber: '', expiry: '', cvv: '' });
+       setCustomerInfo({ name: '', address: '', cardNumber: '', expiry: '', cvv: '', customerPhone: '' });
        setActiveScreen('tracking');
     } catch (error) {
       console.error('Error creating order:', error);
