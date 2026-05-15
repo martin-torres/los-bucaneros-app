@@ -1,7 +1,7 @@
 import type { MenuRepository } from '../contracts';
-import type { MenuCategory, MenuItem, PromoItem } from '../../core/types';
+import type { MenuCategory, MenuItem } from '../../core/types';
 import { pbClient } from './client';
-import { toMenuItem, toPromoItem } from './mappers';
+import { toMenuItem } from './mappers';
 
 export class PocketBaseMenuRepository implements MenuRepository {
   async getAll(): Promise<MenuItem[]> {
@@ -25,12 +25,12 @@ export class PocketBaseMenuRepository implements MenuRepository {
     return toMenuItem(item as any);
   }
 
-  async getActivePromos(): Promise<PromoItem[]> {
+  async getActivePromos(): Promise<MenuItem[]> {
     const items = await pbClient.collection('menu_items').getFullList({
-      filter: 'category = "promo" && active = true',
+      filter: 'promoActive = true && active = true',
       sort: 'name',
     });
-    return items.map((item) => toPromoItem(item as any));
+    return items.map((item) => toMenuItem(item as any));
   }
 }
 

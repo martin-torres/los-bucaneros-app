@@ -2,32 +2,11 @@ import type { MenuItem, Order, OrderStatus } from '../types';
 import type { AppSkinSettings } from '../src/core/types';
 import { menuRepository, ordersRepository, pbClient, settingsRepository } from '../src/data/pocketbase';
 
-export const promosApi = {
-  getActive: async (): Promise<any[]> => {
-    try {
-      const records = await pbClient.collection('promos').getFullList();
-      return records.map((r: any) => ({
-        id: r.id,
-        name: r.code || r.name,
-        description: r.description,
-        price: r.price || 0,
-        category: 'promo',
-        image: r.image || '',
-        active: r.active,
-      }));
-    } catch (error) {
-      console.error('Error fetching promos:', error);
-      return [];
-    }
-  },
-};
-
 export const menuItemsApi = {
   getAll: async (): Promise<MenuItem[]> => menuRepository.getAll(),
   getByCategory: async (category: string): Promise<MenuItem[]> =>
     menuRepository.getByCategory(category as any),
-  getPromotions: async (): Promise<MenuItem[]> =>
-    (await menuRepository.getActivePromos()) as any as MenuItem[],
+  getPromotions: async (): Promise<MenuItem[]> => menuRepository.getActivePromos(),
   getById: async (id: string): Promise<MenuItem> => menuRepository.getById(id),
 };
 

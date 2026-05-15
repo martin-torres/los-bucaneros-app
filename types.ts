@@ -4,7 +4,6 @@ export type {
   PaymentMethod,
   DeliveryType,
   MenuCategory,
-  PromoItem,
   MenuItem,
   OrderItem,
   Order,

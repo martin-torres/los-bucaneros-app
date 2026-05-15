@@ -1,6 +1,6 @@
 const LOCAL_STORAGE_KEY = 'selected_language';
 
-export type SupportedLanguage = 'es' | 'en' | 'ko';
+export type SupportedLanguage = 'es' | 'en' | 'ko' | 'ar' | 'fr' | 'sv';
 
 export function resolveLanguage(): SupportedLanguage {
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -21,23 +21,18 @@ export function setLanguage(lang: SupportedLanguage): void {
 }
 
 function isValidLanguage(value: string): boolean {
-  return value === 'es' || value === 'en' || value === 'ko';
+  return value === 'es' || value === 'en' || value === 'ko' || value === 'ar' || value === 'fr' || value === 'sv';
 }
 
 function detectFromBrowser(): SupportedLanguage {
   const lang = navigator.language.split('-')[0];
   
-  if (lang.startsWith('es')) {
-    return 'es';
-  }
+  if (lang.startsWith('es')) return 'es';
+  if (lang.startsWith('en')) return 'en';
+  if (lang.startsWith('ko')) return 'ko';
+  if (lang.startsWith('ar')) return 'ar';
+  if (lang.startsWith('fr')) return 'fr';
+  if (lang.startsWith('sv')) return 'sv';
   
-  if (lang === 'en') {
-    return 'en';
-  }
-  
-  if (lang === 'ko') {
-    return 'ko';
-  }
-  
-  return 'en';
+  return 'es';
 }

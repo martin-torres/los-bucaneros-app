@@ -27,62 +27,55 @@ async function verifyWeightItems() {
 
     console.log(`📊 Total active items: ${allItems.length}\n`);
 
-    // Check items in especialidades category
-    const especialidadesItems = allItems.filter(item => item.category === 'especialidades');
+    // Check ALL items for weight-related flags
+    const weightItems = allItems.filter(item => item.isWeightBased === true);
+    const itemsWithPriceIssue = allItems.filter(item => item.isWeightBased && item.price > 0);
+    const itemsWithoutPriceButWeight = allItems.filter(item => !item.isWeightBased && item.weightPricePerKg > 0);
 
-    console.log(`📦 Items in "especialidades" category: ${especialidadesItems.length}\n`);
+    console.log('📋 ALL ITEMS CHECK:\n');
+    console.log('┌──────────────────────────────────┬──────────────┬──────────────┬──────────────────┬──────────┐');
+    console.log('│ Name                             │ Category     │ isWeightBased │ weightPricePerKg │ Price    │');
+    console.log('├──────────────────────────────────┼──────────────┼──────────────┼──────────────────┼──────────┤');
 
-    if (especialidadesItems.length === 0) {
-      console.log('❌ No items found in "especialidades" category');
-      return;
-    }
+    allItems.forEach(item => {
+      const name = item.name.padEnd(32).substring(0, 32);
+      const category = (item.category || '').padEnd(12).substring(0, 12);
+      const isWeight = item.isWeightBased === true ? '✅ YES' : '❌ NO';
+      const weightPrice = item.weightPricePerKg && item.weightPricePerKg > 0 ? `${item.weightPricePerKg} MXN` : 'N/A';
+      const price = item.price > 0 ? `${item.price} MXN` : '0 MXN';
 
-    console.log('📋 Item Details:\n');
-    console.log('┌─────────────────┬──────────────┬──────────────┬──────────────┬──────────────┐');
-    console.log('│ Name            │ Category     │ isWeightBased │ weightPriceKg│ Price        │');
-    console.log('├─────────────────┼──────────────┼──────────────┼──────────────┼──────────────┤');
-
-    especialidadesItems.forEach(item => {
-      const isWeightBased = item.isWeightBased === true;
-      const weightPriceKg = item.weightPricePerKg || 0;
-      const price = item.price || 0;
-
-      const name = item.name.padEnd(15);
-      const category = item.category.padEnd(12);
-      const weightBased = isWeightBased ? '✅ YES' : '❌ NO';
-      const weightPrice = weightPriceKg > 0 ? `${weightPriceKg} MXN` : 'N/A';
-      const itemPrice = price > 0 ? `${price} MXN` : '0 MXN';
-
-      console.log(`│ ${name} │ ${category} │ ${weightBased.padEnd(12)} │ ${weightPrice.padEnd(12)} │ ${itemPrice.padEnd(12)} │`);
+      console.log(`│ ${name} │ ${category} │ ${isWeight.padEnd(12)} │ ${weightPrice.padEnd(16)} │ ${price.padEnd(8)} │`);
     });
 
-    console.log('└─────────────────┴──────────────┴──────────────┴──────────────┴──────────────┘\n');
+    console.log('└──────────────────────────────────┴──────────────┴──────────────┴──────────────────┴──────────┘\n');
 
-    // Check for items that should be weight-based but aren't
-    const expectedItems = ['Chicharrón', 'Carnitas', 'Morcón', 'Higado'];
-    const missingWeightBased = expectedItems.filter(name => {
-      const item = especialidadesItems.find(i => i.name === name);
-      return !item || !item.isWeightBased;
-    });
-
-    if (missingWeightBased.length > 0) {
-      console.log('⚠️  WARNING: The following items are missing the isWeightBased flag:');
-      missingWeightBased.forEach(name => console.log(`   - ${name}`));
-      console.log('\n💡 Run the seeding script to fix this:\n');
-      console.log('   node scripts/seed-all-weight-items.js\n');
+    // Report weight-based items
+    console.log('📦 Items MARKED as weight-based:');
+    if (weightItems.length === 0) {
+      console.log('   (none)');
     } else {
-      console.log('✅ All items have the correct isWeightBased flag!\n');
+      weightItems.forEach(item => console.log(`   - ${item.name} (${item.category})`));
     }
 
-    // Check for items that are weight-based but shouldn't be
-    const itemsWithoutPrice = especialidadesItems.filter(item => item.isWeightBased && item.price > 0);
-    if (itemsWithoutPrice.length > 0) {
-      console.log('⚠️  WARNING: The following items have a price but are marked as weight-based:');
-      itemsWithoutPrice.forEach(item => console.log(`   - ${item.name} (${item.price} MXN)`));
-      console.log('\n💡 These items should have price: 0 and weightPricePerKg set instead.\n');
+    // Check for problematic items
+    if (itemsWithPriceIssue.length > 0) {
+      console.log('\n⚠️  WARNING: Items weight-based but have non-zero price:');
+      itemsWithPriceIssue.forEach(item => console.log(`   - ${item.name} (price: ${item.price} MXN, should be 0)`));
     }
 
-    console.log('✨ Verification complete!\n');
+    if (itemsWithoutPriceButWeight.length > 0) {
+      console.log('\n⚠️  WARNING: Items NOT weight-based but have weightPricePerKg > 0:');
+      itemsWithoutPriceButWeight.forEach(item => console.log(`   - ${item.name} (weightPricePerKg: ${item.weightPricePerKg})`));
+    }
+
+    // Check for items with promoActive
+    const promoItems = allItems.filter(item => item.promoActive);
+    if (promoItems.length > 0) {
+      console.log(`\n🔥 Items with active promos: ${promoItems.length}`);
+      promoItems.forEach(item => console.log(`   - ${item.name}: ${item.price} → ${item.promoPrice} MXN`));
+    }
+
+    console.log('\n✨ Verification complete!\n');
   } catch (error) {
     console.error('❌ Verification failed:', error);
     process.exit(1);

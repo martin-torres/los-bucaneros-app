@@ -16,7 +16,9 @@ declare global {
             onFetching: (resource: string) => void;
             onError: (error: { message: string }) => void;
           };
-        }) => mount: (containerId: string) => void;
+        }) => {
+          mount: (containerId: string) => void;
+        };
         getPaymentMethod: (
           params: { bin: string },
           callback: (response: { id: string }[]) => void

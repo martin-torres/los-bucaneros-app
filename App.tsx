@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Order, OrderItem, MenuItem, OrderStatus, CustomerInfo, PromoItem, AppSkinSettings, VisitorRecord } from './types';
-import { menuItemsApi, promosApi, ordersApi, settingsApi, subscribeToOrders } from './lib/pocketbase';
+import { Order, OrderItem, MenuItem, OrderStatus, CustomerInfo, AppSkinSettings, VisitorRecord } from './types';
+import { menuItemsApi, ordersApi, settingsApi, subscribeToOrders } from './lib/pocketbase';
 import { useUrlMode } from './src/hooks/useUrlMode';
 import { useVisitorTracking } from './src/hooks/useVisitorTracking';
 import pb from './lib/pocketbase';
@@ -31,7 +31,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-    const [promos, setPromos] = useState<PromoItem[]>([]);
+    const [promos, setPromos] = useState<MenuItem[]>([]);
     const [settings, setSettings] = useState<AppSkinSettings | null>(null);
     const [settingsLoading, setSettingsLoading] = useState(true);
     const { visitor, visitorId, sessionId, associateVisitorWithOrder } = useVisitorTracking();
@@ -81,7 +81,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   }, [ui.primaryColor, ui.secondaryColor, ui.accentColor, ui.backgroundColor, ui.name]);
 
   useEffect(() => {
-    promosApi.getActive()
+    menuItemsApi.getPromotions()
       .then(items => {
         setPromos(items);
       })
@@ -125,10 +125,6 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '', address: '', cardNumber: '', expiry: '', cvv: '', customerPhone: ''
   });
-
-  // Weight-based modal state
-  const [selectedWeightItem, setSelectedWeightItem] = useState<any>(null);
-  const [showWeightModal, setShowWeightModal] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -175,28 +171,13 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
     if (scrollRef.current) scrollRef.current.scrollTo(0, 0);
   }, [activeScreen, viewMode]);
 
-  const addToCart = (item: MenuItem | PromoItem) => {
-    if ('category' in item && item.category === 'promo' && item.bundleItems && item.bundleItems.length > 0) {
-      setCart(prev => {
-        const existing = prev.find(i => i.id === item.id);
-        if (existing) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-        return [...prev, {
-          ...item,
-          quantity: 1,
-          isBundle: true,
-          bundleItems: item.bundleItems,
-        }];
-      });
-    } else if (item.isWeightBased || item.weightInGrams) {
-      setSelectedWeightItem(item);
-      setShowWeightModal(true);
-    } else {
-      setCart(prev => {
-        const existing = prev.find(i => i.id === item.id);
-        if (existing) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-        return [...prev, { ...item, quantity: 1 }];
-      });
-    }
+  const addToCart = (item: MenuItem) => {
+    const price = item.promoActive ? (item.promoPrice ?? item.price) : item.price;
+    setCart(prev => {
+      const existing = prev.find(i => i.id === item.id);
+      if (existing) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1, price } : i);
+      return [...prev, { ...item, quantity: 1, price }];
+    });
   };
 
   const removeFromCart = (itemId: string) => {
@@ -205,23 +186,6 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
       if (existing && existing.quantity > 1) return prev.map(i => i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i);
       return prev.filter(i => i.id !== itemId);
     });
-  };
-
-  const handleWeightOrderConfirm = (weightInGrams: number) => {
-    if (selectedWeightItem && weightInGrams > 0) {
-      const itemWithWeight = {
-        ...selectedWeightItem,
-        quantity: 1,
-        weightInGrams,
-      };
-      setCart(prev => {
-        const existing = prev.find(i => i.id === selectedWeightItem.id);
-        if (existing) return prev.map(i => i.id === selectedWeightItem.id ? { ...i, quantity: i.quantity + 1, weightInGrams } : i);
-        return [...prev, itemWithWeight];
-      });
-      setShowWeightModal(false);
-      setSelectedWeightItem(null);
-    }
   };
 
   const placeOrder = async (method: any) => {

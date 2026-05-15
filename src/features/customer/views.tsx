@@ -116,9 +116,9 @@ export const LandingView = ({
               <div className="p-4 flex-1">
                 <h3 className="font-bold text-lg text-gray-800">{item.name}</h3>
                 <p className="text-sm text-gray-500 line-clamp-1">{getItemDescription(item.id, item.description)}</p>
-                {item.bundleItems && item.bundleItems.length > 0 && (
+                {item.promoBundle && item.promoBundle.length > 0 && (
                   <div className="mt-1 space-y-0.5">
-                    {item.bundleItems.map((bundleItem: any, idx: number) => (
+                    {item.promoBundle.map((bundleItem: any, idx: number) => (
                       <p key={idx} className="text-[10px] text-gray-400">
                         {bundleItem.quantity}x {bundleItem.name}
                       </p>
@@ -127,9 +127,9 @@ export const LandingView = ({
                 )}
                 <div className="flex items-center justify-between mt-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-black text-xl" style={{ color: secondaryColor }}>${item.price}</p>
-                    {item.originalPrice && item.originalPrice > item.price && (
-                      <p className="text-sm text-gray-400 line-through">${item.originalPrice}</p>
+                    <p className="font-black text-xl" style={{ color: secondaryColor }}>${item.promoActive ? (item.promoPrice ?? item.price) : item.price}</p>
+                    {item.promoActive && item.promoPrice != null && item.promoPrice < item.price && (
+                      <p className="text-sm text-gray-400 line-through">${item.price}</p>
                     )}
                   </div>
                   <span 
@@ -286,7 +286,7 @@ export const MenuView = ({
                       >
                         {t('addButton', '+ Agregar')}
                       </span>
-                      <span className="font-black text-xl" style={{ color: secondaryColor }}>${item.price}</span>
+                      <span className="font-black text-xl" style={{ color: secondaryColor }}>${item.promoActive ? (item.promoPrice ?? item.price) : item.price}</span>
                     </>
                   )}
                 </div>
@@ -507,7 +507,7 @@ export const CheckoutView = ({
                   <h4 className="text-[10px] font-bold text-gray-800 leading-tight mb-1 line-clamp-2">{item.name}</h4>
                 </div>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] font-black text-black">${item.price}</span>
+                  <span className="text-[10px] font-black text-black">${item.promoActive ? (item.promoPrice ?? item.price) : item.price}</span>
                   <span 
                     className="text-black px-2 py-1 rounded-lg text-[10px] font-bold"
                     style={{ backgroundColor: primaryColor }}

@@ -1,4 +1,4 @@
-import type { MenuItem, Order, OrderStatus, PromoItem } from '../../core/types';
+import type { MenuItem, Order, OrderStatus } from '../../core/types';
 
 type RawRecord = Record<string, unknown> & { id: string };
 
@@ -47,16 +47,9 @@ export const toMenuItem = (record: RawRecord): MenuItem => ({
   soldOut: record.soldOut === 1 ? true : asBoolean(record.soldOut),
   stock: record.stock === undefined ? undefined : asNumber(record.stock),
   trackInventory: asBoolean(record.track_inventory),
-});
-
-export const toPromoItem = (record: RawRecord): PromoItem => ({
-  ...toMenuItem(record),
-  category: 'promo',
-  active: asBoolean(record.active),
-  bundleItems: asJson(record.bundleItems, undefined),
-  discountType: asString(record.discountType, undefined) as 'fixed' | 'percent' | undefined,
-  discountValue: record.discountValue === undefined ? undefined : asNumber(record.discountValue),
-  originalPrice: record.originalPrice === undefined ? undefined : asNumber(record.originalPrice),
+  promoActive: asBoolean(record.promoActive),
+  promoPrice: (record.promoPrice === undefined || record.promoPrice === null) ? undefined : asNumber(record.promoPrice),
+  promoBundle: asJson(record.promoBundle, undefined),
 });
 
 export const toOrder = (record: RawRecord): Order => {

@@ -21,20 +21,6 @@ export interface BundleItem {
   price: number;
 }
 
-export interface PromoItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: 'promo';
-  image: string;
-  active: boolean;
-  bundleItems?: BundleItem[];
-  discountType?: 'fixed' | 'percent';
-  discountValue?: number;
-  originalPrice?: number;
-}
-
 export interface MenuItem {
   id: string;
   name: string;
@@ -52,6 +38,12 @@ export interface MenuItem {
   stock?: number;
   /** Whether inventory tracking is enabled for this item. */
   trackInventory?: boolean;
+  /** Whether this item is currently on promo. */
+  promoActive?: boolean;
+  /** Discounted promo price (if different from regular price). */
+  promoPrice?: number;
+  /** Bundle items for combo promos. */
+  promoBundle?: BundleItem[];
 }
 
 export interface ItemOption {

@@ -1,4 +1,6 @@
 import { ItemOption } from '../../core/types';
+import { useLanguage } from '../../../contexts/LanguageContext';
+import { t } from '../../../translations';
 
 interface OptionSelectorProps {
   options: ItemOption[];
@@ -13,6 +15,8 @@ export const OptionSelector = ({
   onClose,
   primaryColor = '#7c3aed',
 }: OptionSelectorProps) => {
+  const { language } = useLanguage();
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div
@@ -23,7 +27,7 @@ export const OptionSelector = ({
         <div className="p-6 border-b border-gray-100">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-xl font-black uppercase italic text-gray-900">
-              Selecciona tu opción
+              {t('title', language, 'Selecciona tu opción')}
             </h3>
             <button
               onClick={onClose}
@@ -33,7 +37,7 @@ export const OptionSelector = ({
             </button>
           </div>
           <p className="text-sm text-gray-500 font-medium">
-            Toca una opción para agregar al carrito
+            {t('subtitle', language, 'Toca una opción para agregar al carrito')}
           </p>
         </div>
 
@@ -77,7 +81,7 @@ export const OptionSelector = ({
             onClick={onClose}
             className="w-full py-4 rounded-2xl font-black uppercase text-sm bg-gray-100 text-gray-600 hover:bg-gray-200"
           >
-            Cancelar
+            {t('cancel', language, 'Cancelar')}
           </button>
         </div>
       </div>

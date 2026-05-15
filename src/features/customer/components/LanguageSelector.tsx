@@ -6,6 +6,9 @@ const LANGUAGE_DISPLAY: Record<SupportedLanguage, string> = {
   es: '🇲🇽 ES',
   en: '🇺🇸 EN',
   ko: '🇰🇷 한국',
+  ar: '🇸🇦 AR',
+  fr: '🇫🇷 FR',
+  sv: '🇸🇪 SV',
 };
 
 export const LanguageSelector = () => {

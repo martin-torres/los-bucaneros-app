@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Weight, DollarSign, Check } from 'lucide-react';
 import type { MenuItem } from '../../../core/types';
+import { useLanguage } from '../../../contexts/LanguageContext';
+import { t, getTranslations } from '../../../translations';
 
 interface WeightOrderModalProps {
   isOpen: boolean;
@@ -19,6 +21,11 @@ export const WeightOrderModal = ({
   primaryColor = '#f59e0b',
   secondaryColor = '#ea580c',
 }: WeightOrderModalProps) => {
+  const { language } = useLanguage();
+  const lang = language;
+  const trans = getTranslations(lang);
+  const wm = trans.weightModal;
+
   const [inputMode, setInputMode] = React.useState<'grams' | 'price'>('grams');
   const [inputValue, setInputValue] = React.useState('');
   const [calculatedWeight, setCalculatedWeight] = React.useState<number | null>(null);
@@ -29,12 +36,10 @@ export const WeightOrderModal = ({
   const pricePerKg = weightPricePerKg;
   const pricePerGram = pricePerKg / 1000;
 
-  // Calculate price from weight
   const calculatePriceFromWeight = (grams: number): number => {
     return Math.round(grams * pricePerGram * 100) / 100;
   };
 
-  // Calculate weight from price
   const calculateWeightFromPrice = (price: number): number => {
     return Math.round((price / pricePerKg) * 1000);
   };
@@ -42,7 +47,7 @@ export const WeightOrderModal = ({
   const handleInputChange = (value: string) => {
     setInputValue(value);
     setError('');
-    
+
     if (!value || value.trim() === '') {
       setCalculatedWeight(null);
       setCalculatedPrice(null);
@@ -51,12 +56,12 @@ export const WeightOrderModal = ({
 
     const numValue = parseFloat(value);
     if (isNaN(numValue)) {
-      setError('Please enter a valid number');
+      setError(wm.errorInvalid || 'Please enter a valid number');
       return;
     }
 
     if (numValue < 0) {
-      setError('Please enter a positive number');
+      setError(wm.errorNegative || 'Please enter a positive number');
       return;
     }
 
@@ -88,35 +93,30 @@ export const WeightOrderModal = ({
     }
   };
 
-  // Handle preset button click - triggers calculation without changing mode
   const handlePresetClick = (grams: number) => {
     setInputValue(grams.toString());
-    // Trigger calculation by calling handleInputChange
     handleInputChange(grams.toString());
   };
 
-  // Presets change based on input mode
   const quickPresets = inputMode === 'grams'
     ? [
-        { label: '1/4 kg', value: 250 },
-        { label: '1/2 kg', value: 500 },
-        { label: '3/4 kg', value: 750 },
-        { label: '1 kg', value: 1000 },
+        { label: wm.presetQuarter || '1/4 kg', value: 250 },
+        { label: wm.presetHalf || '1/2 kg', value: 500 },
+        { label: wm.presetThreeQuarters || '3/4 kg', value: 750 },
+        { label: wm.presetOne || '1 kg', value: 1000 },
       ]
     : [
-        { label: '100 MXN', value: 100 },
-        { label: '200 MXN', value: 200 },
-        { label: '300 MXN', value: 300 },
-        { label: '400 MXN', value: 400 },
+        { label: wm.preset100 || '100 MXN', value: 100 },
+        { label: wm.preset200 || '200 MXN', value: 200 },
+        { label: wm.preset300 || '300 MXN', value: 300 },
+        { label: wm.preset400 || '400 MXN', value: 400 },
       ];
 
-  // Only render modal when isOpen and item exist
   if (!isOpen || !item) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header */}
         <div className="sticky top-0 bg-white z-10 border-b border-gray-100 px-5 py-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-black uppercase italic text-gray-900">
@@ -130,13 +130,11 @@ export const WeightOrderModal = ({
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-1 italic">
-            Precio: {pricePerKg} MXN/kg
+            {wm.pricePerKg?.replace('{price}', String(pricePerKg)) || `Precio: ${pricePerKg} MXN/kg`}
           </p>
         </div>
 
-        {/* Content */}
         <div className="p-5 space-y-6">
-          {/* Input Mode Toggle */}
           <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
             <button
               onClick={() => setInputMode('grams')}
@@ -148,7 +146,7 @@ export const WeightOrderModal = ({
             >
               <div className="flex items-center justify-center gap-1">
                 <Weight className="w-4 h-4" />
-                Gramos
+                {wm.grams || 'Gramos'}
               </div>
             </button>
             <button
@@ -161,15 +159,14 @@ export const WeightOrderModal = ({
             >
               <div className="flex items-center justify-center gap-1">
                 <DollarSign className="w-4 h-4" />
-                Pesos
+                {wm.pesos || 'Pesos'}
               </div>
             </button>
           </div>
 
-          {/* Quick Presets - MOVED TO TOP */}
           <div>
             <label className="text-xs font-black uppercase text-gray-400 mb-3 block">
-              Presets rápidos
+              {wm.presets || 'Presets rápidos'}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {quickPresets.map((preset) => (
@@ -184,22 +181,21 @@ export const WeightOrderModal = ({
             </div>
           </div>
 
-          {/* Input Field */}
           <div>
             <label className="text-xs font-black uppercase text-gray-400 mb-2 block">
-              {inputMode === 'grams' ? 'Ingresa cantidad en gramos' : 'Ingresa el monto'}
+              {inputMode === 'grams' ? (wm.inputLabelGrams || 'Ingresa cantidad en gramos') : (wm.inputLabelPrice || 'Ingresa el monto')}
             </label>
             <div className="relative">
               <input
                 type="number"
-                placeholder={inputMode === 'grams' ? 'Ej. 250' : 'Ej. 100'}
+                placeholder={inputMode === 'grams' ? (wm.placeholderGrams || 'Ej. 250') : (wm.placeholderPrice || 'Ej. 100')}
                 className="w-full pl-4 pr-12 py-4 bg-gray-50 border-2 border-gray-100 rounded-xl font-black text-2xl focus:border-black focus:outline-none transition-colors"
                 value={inputValue}
                 onChange={(e) => handleInputChange(e.target.value)}
                 autoFocus
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
-                {inputMode === 'grams' ? 'g' : 'MXN'}
+                {inputMode === 'grams' ? (wm.unitGrams || 'g') : (wm.unitPrice || 'MXN')}
               </span>
             </div>
             {error && (
@@ -207,7 +203,6 @@ export const WeightOrderModal = ({
             )}
           </div>
 
-          {/* Live Calculation - NOW CLICKABLE */}
           {calculatedWeight !== null && calculatedPrice !== null && (
             <div 
               className="bg-black text-white rounded-xl p-4 space-y-3 cursor-pointer hover:bg-gray-900 transition-colors"
@@ -221,7 +216,7 @@ export const WeightOrderModal = ({
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-white/10">
                 <span className="text-sm font-bold uppercase text-gray-300">
-                  Agregar
+                  {wm.addButton || 'Agregar'}
                 </span>
                 <span className="text-2xl font-black">
                   ${calculatedPrice}
