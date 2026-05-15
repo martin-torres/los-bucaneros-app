@@ -113,9 +113,9 @@ export const LandingView = ({
                   </div>
                 )}
               </div>
-              <div className="p-4 flex-1">
+              <div className="p-4 flex-1 flex flex-col justify-center">
                 <h3 className="font-bold text-lg text-gray-800">{item.name}</h3>
-                <p className="text-sm text-gray-500 line-clamp-1">{getItemDescription(item.id, item.description)}</p>
+                <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed">{getItemDescription(item.id, item.description)}</p>
                 {item.promoBundle && item.promoBundle.length > 0 && (
                   <div className="mt-1 space-y-0.5">
                     {item.promoBundle.map((bundleItem: any, idx: number) => (
