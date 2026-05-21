@@ -7,9 +7,10 @@ import { OrdersPage } from './pages/OrdersPage';
 import { PromotionsPage } from './pages/PromotionsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { InventoryPage } from './pages/InventoryPage';
-import { menuApi, ordersApi, settingsApi, promosApi, adminAuth } from './adminApi';
+import { LeadsPage } from './pages/LeadsPage';
+import { menuApi, ordersApi, settingsApi, promosApi, adminAuth, leadsApi } from './adminApi';
 
-type AdminPage = 'dashboard' | 'menu' | 'orders' | 'promotions' | 'settings' | 'inventory';
+type AdminPage = 'dashboard' | 'menu' | 'orders' | 'promotions' | 'settings' | 'inventory' | 'leads';
 
 interface AdminModuleProps {
   settings: any;
@@ -26,6 +27,7 @@ export const AdminModule = ({
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [promos, setPromos] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(initialSettings);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -35,21 +37,24 @@ export const AdminModule = ({
   const loadData = useCallback(async () => {
     try {
       console.log('[Admin] Loading data...');
-      const [menuData, orderData, promoData, settingsData] = await Promise.all([
+      const [menuData, orderData, promoData, settingsData, leadsData] = await Promise.all([
         menuApi.getAll(),
         ordersApi.getAll(),
         promosApi.getAll(),
         settingsApi.get(),
+        leadsApi.getAll(),
       ]);
       console.log('[Admin] Loaded:', { 
         menuItems: menuData.length, 
         orders: orderData.length, 
         promos: promoData.length,
+        leads: leadsData.length,
         hasSettings: !!settingsData 
       });
       setMenuItems(menuData);
       setOrders(orderData);
       setPromos(promoData);
+      setLeads(leadsData);
       if (settingsData) setSettings(settingsData);
     } catch (error) {
       console.error('[Admin] Error loading data:', error);
@@ -146,6 +151,26 @@ export const AdminModule = ({
       await loadData();
     } catch (error) {
       console.error('Error deleting promo:', error);
+      throw error;
+    }
+  };
+
+  const handleLeadUpdate = async (id: string, data: any) => {
+    try {
+      await leadsApi.update(id, data);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      throw error;
+    }
+  };
+
+  const handleLeadDelete = async (id: string) => {
+    try {
+      await leadsApi.delete(id);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting lead:', error);
       throw error;
     }
   };
@@ -267,6 +292,14 @@ export const AdminModule = ({
             categories={categories}
             onToggleActive={handleToggleActive}
             onUpdateStock={handleUpdateStock}
+          />
+        );
+      case 'leads':
+        return (
+          <LeadsPage
+            leads={leads}
+            onUpdate={handleLeadUpdate}
+            onDelete={handleLeadDelete}
           />
         );
       default:

@@ -95,6 +95,10 @@ export interface VisitorRecord {
   lastVisit: string;
   visitCount: number;
   associatedOrders?: string[];
+  name?: string;
+  phone?: string;
+  leadCaptured?: boolean;
+  selectedPackage?: string;
 }
 
 export interface CustomerInfo {

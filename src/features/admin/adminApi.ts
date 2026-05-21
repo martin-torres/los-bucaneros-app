@@ -90,4 +90,26 @@ export const promosApi = {
   },
 };
 
+// Leads
+export const leadsApi = {
+  getAll: async () => {
+    const records = await pb.collection('leads').getFullList({ sort: '-created' });
+    return records;
+  },
+  
+  create: async (data: any) => {
+    const record = await pb.collection('leads').create(data);
+    return record;
+  },
+  
+  update: async (id: string, data: any) => {
+    const record = await pb.collection('leads').update(id, data);
+    return record;
+  },
+  
+  delete: async (id: string) => {
+    await pb.collection('leads').delete(id);
+  },
+};
+
 export default pb;
