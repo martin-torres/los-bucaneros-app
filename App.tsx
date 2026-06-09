@@ -377,7 +377,7 @@ const newOrder = await pb.collection('orders').create(formData);
 
   return (
     <LanguageProvider>
-      <div className="min-h-[100dvh] max-w-lg mx-auto shadow-2xl flex flex-col relative overflow-hidden border-x border-gray-100" style={{ backgroundColor: ui.backgroundColor }}>
+      <div className="h-screen max-w-lg mx-auto shadow-2xl flex flex-col relative overflow-hidden border-x border-gray-100" style={{ backgroundColor: ui.backgroundColor }}>
       <div className="shrink-0 bg-white/90 backdrop-blur-xl border-b-2 border-gray-100 p-4 flex justify-between items-center z-50">
         <div className="flex items-center gap-3">
           <RestaurantLogo logoUrl={ui.logoUrl} restaurantName={ui.name} primaryColor={ui.primaryColor} />
