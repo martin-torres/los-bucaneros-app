@@ -1,4 +1,4 @@
-# Dulceria de Lalo - PocketBase Backend
+# Los Bucaneros - PocketBase Backend
 FROM ghcr.io/muchobien/pocketbase:latest
 
 # The pocketbase binary is already at /usr/local/bin/pocketbase

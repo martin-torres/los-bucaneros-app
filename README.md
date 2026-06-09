@@ -1,6 +1,6 @@
-# El Arrocito App
+# Los Bucaneros App
 
-React + Vite PWA with PocketBase-backed data and database-driven theming for El Arrocito restaurant.
+React + Vite PWA with PocketBase-backed data and database-driven theming for Los Bucaneros restaurant.
 
 ## Current Runtime
 

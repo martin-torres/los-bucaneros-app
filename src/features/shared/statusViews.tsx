@@ -19,7 +19,7 @@ export const LoadingView = ({
   loadingTitle = 'Cargando Menú',
 }: LoadingViewProps) => (
   <div
-    className="h-screen w-full flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500"
+    className="min-h-[100dvh] w-full flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500"
     style={{ backgroundColor }}
   >
     <div className="relative w-24 h-24 mb-8">
@@ -51,7 +51,7 @@ export const ErrorView = ({
   errorTitle = 'Error al Cargar',
   retryLabel = 'Intentar de Nuevo',
 }: ErrorViewProps) => (
-  <div className="h-screen w-full flex flex-col items-center justify-center p-6 bg-background animate-in fade-in zoom-in-95 duration-500">
+  <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 bg-background animate-in fade-in zoom-in-95 duration-500">
     <div className="w-full max-w-md bg-white border-2 border-red-200 p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(239,68,68,0.3)] text-center">
       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
         <svg

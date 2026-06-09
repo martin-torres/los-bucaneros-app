@@ -9,4 +9,5 @@ export type {
   Order,
   CustomerInfo,
   AppSkinSettings,
+  VisitorRecord,
 } from './src/core/types';

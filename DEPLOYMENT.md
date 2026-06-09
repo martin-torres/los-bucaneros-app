@@ -1,6 +1,6 @@
-# Dulceria de Lalo - Deployment Playbook (V1 Production)
+# Los Bucaneros - Deployment Playbook (V1 Production)
 
-**Project:** Dulceria de Lalo / Dulces Regios DR  
+**Project:** Los Bucaneros - BBQ Ahumado Artesanal  
 **Frontend:** https://candy-cush.vercel.app  
 **Backend:** https://dulceria-pocketbase.fly.dev  
 **Status:** ✅ PRODUCTION LIVE  

@@ -152,19 +152,24 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   }, [analyticsRefreshTrigger]);
 
   const handleRetry = () => {
-    // Reset state and re-trigger the same simulated fetch logic
     setError(null);
     setIsLoading(true);
-    
-    const delay = 800 + Math.random() * 1200;
-    setTimeout(() => {
-      if (Math.random() < 0.2) {
-        setError("Error al cargar el menú. Por favor, intenta de nuevo.");
-      } else {
+
+    menuItemsApi.getAll()
+      .then(items => {
+        const filtered = items.filter(item => {
+          if (item.trackInventory && item.stock !== undefined && item.stock <= 0) return false;
+          return true;
+        });
+        setMenuItems(filtered);
         setError(null);
-      }
-      setIsLoading(false);
-    }, delay);
+      })
+      .catch(() => {
+        setError("Error al cargar el menú desde el servidor.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -372,7 +377,7 @@ const newOrder = await pb.collection('orders').create(formData);
 
   return (
     <LanguageProvider>
-      <div className="h-screen max-w-lg mx-auto shadow-2xl flex flex-col relative overflow-hidden border-x border-gray-100" style={{ backgroundColor: ui.backgroundColor }}>
+      <div className="min-h-[100dvh] max-w-lg mx-auto shadow-2xl flex flex-col relative overflow-hidden border-x border-gray-100" style={{ backgroundColor: ui.backgroundColor }}>
       <div className="shrink-0 bg-white/90 backdrop-blur-xl border-b-2 border-gray-100 p-4 flex justify-between items-center z-50">
         <div className="flex items-center gap-3">
           <RestaurantLogo logoUrl={ui.logoUrl} restaurantName={ui.name} primaryColor={ui.primaryColor} />
@@ -418,7 +423,7 @@ const newOrder = await pb.collection('orders').create(formData);
             {activeScreen === 'landing' && <LandingView addToCart={addToCart} setActiveScreen={setActiveScreen} promos={promos} settings={ui} primaryColor={ui.primaryColor} secondaryColor={ui.secondaryColor} />}
             {activeScreen === 'menu' && <MenuView addToCart={addToCart} setCart={setCart} setActiveScreen={setActiveScreen} menuItems={menuItems} settings={ui} primaryColor={ui.primaryColor} secondaryColor={ui.secondaryColor} />}
             {activeScreen === 'checkout' && (
-              <CheckoutView cart={cart} setCart={setCart} addToCart={addToCart} removeFromCart={removeFromCart} setActiveScreen={setActiveScreen} deliveryType={deliveryType} setDeliveryType={setDeliveryType} customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} payWithAmount={payWithAmount} setPayWithAmount={setPayWithAmount} transferFile={transferFile} setTransferFile={setTransferFile} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} placeOrder={placeOrder} cartTotal={cartTotal} menuItems={menuItems} settings={ui} currency={ui.currency} deliveryFee={checkoutDeliveryFee} deliveryDistanceKm={checkoutDeliveryDistanceKm} primaryColor={ui.primaryColor} secondaryColor={ui.secondaryColor} />
+              <CheckoutView cart={cart} setCart={setCart} addToCart={addToCart} removeFromCart={removeFromCart} setActiveScreen={setActiveScreen} deliveryType={deliveryType} setDeliveryType={setDeliveryType} customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} payWithAmount={payWithAmount} setPayWithAmount={setPayWithAmount} transferFile={transferFile} setTransferFile={setTransferFile} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} placeOrder={placeOrder} cartTotal={cartTotal} menuItems={menuItems} settings={ui} currency={ui.currency} deliveryFee={checkoutDeliveryFee} deliveryDistanceKm={checkoutDeliveryDistanceKm} primaryColor={ui.primaryColor} secondaryColor={ui.secondaryColor} visitorId={visitorId} />
             )}
             {activeScreen === 'tracking' && <TrackingView currentOrder={currentOrder} setActiveScreen={setActiveScreen} primaryColor={ui.primaryColor} currency={ui.currency} uiText={ui.uiText} />}
           </>

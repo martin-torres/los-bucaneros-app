@@ -46,3 +46,6 @@ coverage/
 *.tmp
 *.temp
 .vercel
+
+# Vite dev build
+dev-dist/

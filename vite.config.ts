@@ -16,9 +16,9 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
         manifest: {
-          name: 'El Arrocito',
-          short_name: 'El Arrocito',
-          description: 'App de pedidos El Arrocito - Comida Mexicana',
+          name: 'Los Bucaneros',
+          short_name: 'Los Bucaneros',
+          description: 'Los Bucaneros - BBQ Ahumado Artesanal',
           theme_color: '#fbbf24',
           background_color: '#fdfcfb',
           display: 'standalone',

@@ -11,9 +11,6 @@
     "seed:menu": "node scripts/seed-bucaneros-menu.js"
   },
   "dependencies": {
-    "dotenv": "^16.6.1",
-    "form-data": "^4.0.5",
-    "fs": "^0.0.1-security",
     "lucide-react": "^0.561.0",
     "pocketbase": "^0.26.8",
     "react": "^19.2.3",
@@ -23,6 +20,7 @@
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.24",
+    "dotenv": "^16.6.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.8.2",
