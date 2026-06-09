@@ -71,8 +71,8 @@ export const LandingView = ({
           className="absolute inset-0"
           style={{
             background: settings?.heroImageUrl
-              ? `linear-gradient(to top, ${secondaryColor}cc, ${secondaryColor}40)`
-              : 'none',
+              ? `linear-gradient(to top, ${secondaryColor}dd, ${secondaryColor}20 60%, transparent)`
+              : `linear-gradient(135deg, ${primaryColor}dd, ${secondaryColor})`,
           }}
         />
         <div className="absolute inset-0 flex flex-col justify-end p-6">
@@ -83,11 +83,11 @@ export const LandingView = ({
             {settings?.locationText || 'Restaurante'}
           </span>
           <h1
-            className="text-3xl font-black italic uppercase leading-tight mb-1 text-white"
+            className="text-4xl font-black italic uppercase leading-none tracking-tight mb-2 text-white"
           >
             {settings?.name || 'Menú Digital'}
           </h1>
-          <p className="text-white/80 text-sm font-medium">
+          <p className="text-white/80 text-sm font-medium max-w-[75%]">
             {settings?.tagline || 'Pide directo, sin comisiones'}
           </p>
         </div>
@@ -106,10 +106,10 @@ export const LandingView = ({
             </h2>
           </div>
           <div className="grid gap-3">
-            {promos.map((promo: any) => (
+            {promos.map((promo: any, idx: number) => (
               <div
                 key={promo.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex cursor-pointer hover:shadow-md transition-all"
+                className={`bg-white rounded-2xl border border-gray-100 shadow-soft overflow-hidden flex cursor-pointer card-hover animate-fade-in-up delay-${Math.min(idx + 1, 6)}`}
                 onClick={() => addToCart(promo)}
               >
                 {promo.image ? (
@@ -146,7 +146,7 @@ export const LandingView = ({
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => setActiveScreen('menu')}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center hover:shadow-md transition-all active:scale-95"
+            className="bg-white rounded-2xl border border-gray-100 shadow-soft p-6 text-center card-hover btn-press active:scale-[0.97] transition-all"
           >
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
@@ -160,7 +160,7 @@ export const LandingView = ({
           </button>
           <button
             onClick={() => setActiveScreen('checkout')}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center hover:shadow-md transition-all active:scale-95"
+            className="bg-white rounded-2xl border border-gray-100 shadow-soft p-6 text-center card-hover btn-press active:scale-[0.97] transition-all"
           >
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
@@ -295,10 +295,10 @@ export const MenuView = ({
           </div>
         ) : (
           <div className="grid gap-4">
-            {filteredItems.map((item: any) => (
+            {filteredItems.map((item: any, idx: number) => (
               <div
                 key={item.id}
-                className="bg-white overflow-hidden rounded-2xl border border-gray-100 shadow-sm flex items-center group cursor-pointer transition-all hover:shadow-lg"
+                className={`bg-white overflow-hidden rounded-2xl border border-gray-100 shadow-soft flex items-center group cursor-pointer card-hover animate-fade-in-up delay-${Math.min(idx + 1, 6)}`}
                 onClick={() => handleItemClick(item)}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = primaryColor)}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
