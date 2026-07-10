@@ -123,7 +123,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   const [kitchenLoading, setKitchenLoading] = useState(true);
   const [switcherExpanded, setSwitcherExpanded] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: '', address: '', cardNumber: '', expiry: '', cvv: '', customerPhone: ''
+    name: '', address: '', street: '', colonia: '', addressDetails: '', cardNumber: '', expiry: '', cvv: '', customerPhone: ''
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -216,12 +216,19 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
 
       const newOrderData: Omit<Order, 'id'> = {
         customerName: customerInfo.name || 'Invitado',
-        customerAddress: deliveryType === 'domicilio' ? customerInfo.address : ui.pickupLocationText,
+        customerAddress: deliveryType === 'domicilio'
+          ? `${customerInfo.street || customerInfo.address}, Col. ${customerInfo.colonia || ''}`
+          : ui.pickupLocationText,
+        customerColonia: deliveryType === 'domicilio' ? customerInfo.colonia || '' : undefined,
+        customerDetails: deliveryType === 'domicilio' ? customerInfo.addressDetails || '' : undefined,
         items: [...cart],
         total: cartTotal,
         status: method === 'transferencia' ? 'pendiente_pago' : 'recibido',
         paymentMethod: method,
         payWithAmount: method === 'efectivo' && payWithAmount ? parseFloat(payWithAmount) : undefined,
+        changeAmount: method === 'efectivo' && payWithAmount
+          ? Math.max(0, parseFloat(payWithAmount) - (cartTotal + (deliveryFee || 0)))
+          : undefined,
         transferScreenshot: method === 'transferencia' ? transferFile : undefined,
         deliveryDistanceKm,
         deliveryFee,
@@ -233,6 +240,15 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
       const formData = new FormData();
       formData.append('customerName', newOrderData.customerName);
       formData.append('customerAddress', newOrderData.customerAddress);
+      if (newOrderData.customerColonia !== undefined) {
+        formData.append('customerColonia', newOrderData.customerColonia);
+      }
+      if (newOrderData.customerDetails !== undefined) {
+        formData.append('customerDetails', newOrderData.customerDetails);
+      }
+      if (newOrderData.changeAmount !== undefined) {
+        formData.append('changeAmount', newOrderData.changeAmount.toString());
+      }
       formData.append('items', JSON.stringify(newOrderData.items));
       formData.append('total', newOrderData.total.toString());
       formData.append('status', newOrderData.status);
@@ -259,7 +275,7 @@ const newOrder = await pb.collection('orders').create(formData);
         
         await associateVisitorWithOrder(newOrder.id);
         
-        if (settings?.telegramBotToken && settings?.telegramChatId && settings?.telegramNotificationsEnabled) {
+       if (settings?.telegramBotToken && settings?.telegramChatId && settings?.telegramNotificationsEnabled) {
           sendTelegramNotification(newOrder, {
             botToken: settings.telegramBotToken,
             chatId: settings.telegramChatId
@@ -271,7 +287,7 @@ const newOrder = await pb.collection('orders').create(formData);
        setPayWithAmount('');
        setTransferFile(null);
        // RESET CUSTOMER INFO FOR NEXT ORDER
-       setCustomerInfo({ name: '', address: '', cardNumber: '', expiry: '', cvv: '', customerPhone: '' });
+       setCustomerInfo({ name: '', address: '', street: '', colonia: '', addressDetails: '', cardNumber: '', expiry: '', cvv: '', customerPhone: '' });
        setActiveScreen('tracking');
     } catch (error) {
       console.error('Error creating order:', error);

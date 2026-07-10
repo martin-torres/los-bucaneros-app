@@ -649,15 +649,35 @@ export const CheckoutView = ({
             }
           />
           {deliveryType === 'domicilio' && (
-            <input
-              type="text"
-              placeholder={t('addressPlaceholder', 'Dirección de entrega *')}
-              className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
-              value={customerInfo.address}
-              onChange={e =>
-                setCustomerInfo({ ...customerInfo, address: e.target.value })
-              }
-            />
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder={t('streetPlaceholder', 'Calle y número *')}
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
+                value={customerInfo.street || ''}
+                onChange={e =>
+                  setCustomerInfo({ ...customerInfo, street: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder={t('coloniaPlaceholder', 'Colonia *')}
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
+                value={customerInfo.colonia || ''}
+                onChange={e =>
+                  setCustomerInfo({ ...customerInfo, colonia: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder={t('addressDetailsPlaceholder', 'Detalles (casa, depa, punto de referencia)')}
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-sm"
+                value={customerInfo.addressDetails || ''}
+                onChange={e =>
+                  setCustomerInfo({ ...customerInfo, addressDetails: e.target.value })
+                }
+              />
+            </div>
           )}
         </div>
       </section>
@@ -729,7 +749,7 @@ export const CheckoutView = ({
               value={payWithAmount}
               onChange={e => setPayWithAmount(e.target.value)}
             />
-            {payWithAmount && parseFloat(payWithAmount) > cartTotal && (
+            {payWithAmount && parseFloat(payWithAmount) > grandTotal && (
               <p className="text-xs text-green-600 mt-1">
                 Cambio: ${(parseFloat(payWithAmount) - grandTotal).toFixed(0)}
               </p>
@@ -776,7 +796,7 @@ export const CheckoutView = ({
       {/* Place Order Button */}
       <button
         onClick={handlePlaceOrder}
-        disabled={!customerInfo.name || submitting}
+        disabled={!customerInfo.name || submitting || (deliveryType === 'domicilio' && (!customerInfo.street || !customerInfo.colonia))}
         className="w-full py-5 rounded-2xl font-black text-lg shadow-xl disabled:opacity-50 transition-all active:scale-95 text-white uppercase italic mb-8"
         style={{
           backgroundColor: !customerInfo.name ? '#ccc' : primaryColor,

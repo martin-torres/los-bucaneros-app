@@ -46,9 +46,40 @@ function formatOrderMessage(order: Order, message: string = ''): string {
   notification += `━━━━━━━━━━━━━━━━\n`;
   notification += `*Cliente:* ${order.customerName}\n`;
   if (order.customerPhone) notification += `*Tel:* ${order.customerPhone}\n`;
-  notification += `*Tipo:* ${order.customerAddress.includes('Paso por él') ? '🚀 Pickup' : '🏠 Delivery'}\n`;
+  
+  // Address block — only for delivery (not pickup)
+  const isPickup = order.customerAddress
+    && (order.customerAddress.includes('Paso por él') || order.customerAddress.includes('Recoger'));
+  if (order.customerAddress && !isPickup) {
+    notification += `*Dirección:* ${order.customerAddress}\n`;
+    const mapsQuery = encodeURIComponent(order.customerAddress);
+    notification += `🔗 [Ver en Maps](https://www.google.com/maps?q=${mapsQuery})\n`;
+    if (order.customerDetails) {
+      notification += `*Detalles:* ${order.customerDetails}\n`;
+    }
+  }
+  
+  notification += `*Tipo:* ${isPickup ? '🚀 Pickup' : '🏠 Delivery'}\n`;
   notification += `*Pago:* ${paymentMethodText[order.paymentMethod] || order.paymentMethod}\n`;
-  notification += `*Total:* $${order.total} ${order.total > 0 ? 'MXN' : ''}\n`;
+  
+  // Payment breakdown — only for cash
+  if (order.paymentMethod === 'efectivo') {
+    if (order.payWithAmount) {
+      notification += `*Paga con:* $${order.payWithAmount}\n`;
+    }
+    if (order.changeAmount !== undefined && order.changeAmount !== null) {
+      notification += `*Cambio:* $${order.changeAmount}\n`;
+    }
+  }
+  
+  const grandTotal = order.total + (order.deliveryFee || 0);
+  if (order.deliveryFee) {
+    notification += `*Subtotal:* $${order.total} MXN\n`;
+    notification += `*Envío:* $${order.deliveryFee} MXN\n`;
+    notification += `*Total:* $${grandTotal} MXN\n`;
+  } else {
+    notification += `*Total:* $${order.total} MXN\n`;
+  }
   notification += `*Status:* ${emoji} ${statusName}\n`;
   notification += `━━━━━━━━━━━━━━━━\n`;
   notification += `*Items:*\n${itemsList}`;

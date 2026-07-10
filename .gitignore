@@ -21,6 +21,9 @@ pocketbase/*.db
 pocketbase/*.db-shm
 pocketbase/*.db-wal
 pocketbase/pocketbase.log
+pb_data/
+pb_data/*.db-shm
+pb_data/*.db-wal
 
 # IDE
 .vscode/

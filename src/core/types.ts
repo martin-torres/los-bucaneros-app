@@ -70,11 +70,14 @@ export interface Order {
   collectionName?: string;
   customerName: string;
   customerAddress: string;
+  customerColonia?: string;
+  customerDetails?: string;
   items: OrderItem[];
   total: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   payWithAmount?: number;
+  changeAmount?: number;
   transferScreenshot?: string;
   deliveryDistanceKm?: number;
   deliveryFee?: number;
@@ -104,6 +107,9 @@ export interface VisitorRecord {
 export interface CustomerInfo {
   name: string;
   address: string;
+  street: string;
+  colonia: string;
+  addressDetails: string;
   cardNumber: string;
   expiry: string;
   cvv: string;
