@@ -7,7 +7,6 @@ import pb from './lib/pocketbase';
 import { calculateDeliveryFee, haversineKm } from './src/core/pricing';
 import { resolveUiSettings } from './src/core/uiSettings';
 import { LanguageProvider } from './src/contexts/LanguageContext';
-import { sendTelegramNotification } from './lib/telegram';
 import {
   LoadingView,
   ErrorView,
@@ -274,14 +273,13 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
 const newOrder = await pb.collection('orders').create(formData);
         
         await associateVisitorWithOrder(newOrder.id);
-        
-       if (settings?.telegramBotToken && settings?.telegramChatId && settings?.telegramNotificationsEnabled) {
-          sendTelegramNotification(newOrder, {
-            botToken: settings.telegramBotToken,
-            chatId: settings.telegramChatId
-          }, 'new_order').catch(console.error);
-        }
-        
+       if (settings?.telegramNotificationsEnabled) {
+         fetch('/api/notify', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ orderId: newOrder.id })
+         }).catch(console.error);
+       }
         setCurrentOrder(newOrder);
        setCart([]);
        setPayWithAmount('');

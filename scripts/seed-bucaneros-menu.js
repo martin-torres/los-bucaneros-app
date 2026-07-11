@@ -1,8 +1,12 @@
 import PocketBase from 'pocketbase';
 
 const PB_URL = process.env.PB_URL || 'http://127.0.0.1:8090';
-const PB_ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL || 'admin@losbuncaneros.com';
-const PB_ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD || 'LosBucanerosAdmin2026!';
+const PB_ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL;
+const PB_ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD;
+if (!PB_ADMIN_EMAIL || !PB_ADMIN_PASSWORD) {
+  console.error('Error: PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables are required');
+  process.exit(1);
+}
 
 const pb = new PocketBase(PB_URL);
 

@@ -1,10 +1,10 @@
 #!/bin/bash
 # Upload all item images to PocketBase using curl with multipart form data
 
-PB_URL="https://los-bucaneros-pb.fly.dev"
-ADMIN_EMAIL="admin@losbuncaneros.com"
-ADMIN_PASS="LosBucanerosAdmin2026!"
-IMAGE_DIR="/Users/lomalinda007yahoo.com/Downloads/Bucanero images"
+PB_URL="${PB_URL:-https://los-bucaneros-pb.fly.dev}"
+ADMIN_EMAIL="${PB_ADMIN_EMAIL:?Error: PB_ADMIN_EMAIL is required}"
+ADMIN_PASS="${PB_ADMIN_PASSWORD:?Error: PB_ADMIN_PASSWORD is required}"
+IMAGE_DIR="${IMAGE_DIR:-/Users/lomalinda007yahoo.com/Downloads/Bucanero images}"
 
 # Get auth token
 echo "Authenticating..."

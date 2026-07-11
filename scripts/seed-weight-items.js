@@ -9,8 +9,8 @@ const pb = new PocketBase(process.env.POCKETBASE_URL || 'http://localhost:8090')
 
 // Set admin auth
 await pb.admins.authWithPassword(
-  process.env.PB_ADMIN_EMAIL || 'trulum@proton.me',
-  process.env.PB_ADMIN_PASSWORD || 'z9BtVngz7MpN@Vpu*v6k'
+  process.env.PB_ADMIN_EMAIL,
+  process.env.PB_ADMIN_PASSWORD
 );
 
 console.log('✅ Connected to PocketBase as admin');

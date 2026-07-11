@@ -2,9 +2,13 @@ import PocketBase from 'pocketbase';
 import fs from 'fs';
 import path from 'path';
 
-const PB_URL = 'https://los-bucaneros-pb.fly.dev';
-const ADMIN_EMAIL = 'admin@losbuncaneros.com';
-const ADMIN_PASSWORD = 'LosBucanerosAdmin2026!';
+const PB_URL = process.env.PB_URL || 'https://los-bucaneros-pb.fly.dev';
+const ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD;
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('Error: PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables are required');
+  process.exit(1);
+}
 
 const IMAGE_DIR = '/Users/lomalinda007yahoo.com/Downloads/Bucanero images';
 

@@ -1,12 +1,6 @@
 app = "los-bucaneros-pb"
 primary_region = "iad"
 
-[build]
-  image = "ghcr.io/muchobien/pocketbase:latest"
-
-[env]
-  PB_ENCRYPTION_KEY = ""
-
 [mounts]
   source = "pb_data"
   destination = "/pb_data"

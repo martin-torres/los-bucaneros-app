@@ -72,8 +72,8 @@
 ### 2. Security Hardening
 - ✅ Removed hardcoded credentials from source code
 - ✅ Added `.gitignore` for `pocketbase/pb_data/`, `.env`, `node_modules/`
-- ✅ Changed admin password: `ueFMYCEpwf1fBE22Rd1B`
-- ✅ Changed PINs: Kitchen=6744, Admin/Data=2222
+- ✅ Changed admin password (stored locally in CREDENTIALS.md)
+- ✅ Changed PINs (stored locally in CREDENTIALS.md)
 - ✅ Removed database from git tracking
 
 ### 3. Fly.io PocketBase Deployment

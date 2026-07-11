@@ -1,16 +1,26 @@
 import PocketBase from 'pocketbase';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-const pb = new PocketBase('http://localhost:8090');
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+
+const PB_URL = process.env.POCKETBASE_URL || 'http://localhost:8090';
+const ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD;
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('Error: PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables are required');
+  process.exit(1);
+}
+
+const pb = new PocketBase(PB_URL);
 
 async function verifySchema() {
   try {
     console.log('Authenticating with PocketBase...');
     const authData = await pb.admins.authWithPassword(
-      'trulum@proton.me',
-      'z9BtVngz7MpN@Vpu*v6k'
+      ADMIN_EMAIL,
+      ADMIN_PASSWORD
     );
-    console.log('✓ Authentication successful');
-    
     console.log('\nFetching all collections...');
     const collections = await pb.collections.getList(1, 50, { sort: '-created' });
     
