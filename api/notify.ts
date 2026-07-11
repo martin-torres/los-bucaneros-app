@@ -158,7 +158,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!telegramResp.ok) {
       const errorData: unknown = await telegramResp.json();
       console.error('[notify] Telegram API error:', errorData);
-      return res.status(200).json({ ok: true, warning: 'Telegram send failed' });
+      return res.status(200).json({ ok: true, warning: 'Telegram send failed', error: errorData });
     }
 
     return res.status(200).json({ ok: true });
