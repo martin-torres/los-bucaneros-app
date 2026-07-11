@@ -73,8 +73,8 @@ export const AdminModule = ({
     const correctPin = settings?.adminPin || '1234';
     if (pinInput === correctPin) {
       try {
-        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || prompt('Admin email:') || '';
-        const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || prompt('Admin password:') || '';
+        const adminEmail = prompt('Admin email:') || '';
+        const adminPassword = prompt('Admin password:') || '';
         if (!adminEmail || !adminPassword) {
           setPinError('Credenciales no proporcionadas');
           return;
