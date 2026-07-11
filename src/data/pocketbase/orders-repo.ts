@@ -7,10 +7,9 @@ export class PocketBaseOrdersRepository
   implements OrdersRepository, OrdersRealtimeRepository
 {
   async create(orderData: Omit<Order, 'id'> & { id?: string }): Promise<Order> {
-    const id = orderData.id || Math.random().toString(36).slice(2, 8).toUpperCase();
     const order = await pbClient.collection('orders').create({
       ...orderData,
-      id,
+      id: orderData.id || undefined,  // Let PocketBase auto-generate 15-char ID
       timestamp: Date.now(),
       statusTimestamps: {
         recibido: Date.now(),
