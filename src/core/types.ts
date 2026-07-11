@@ -110,9 +110,6 @@ export interface CustomerInfo {
   street: string;
   colonia: string;
   addressDetails: string;
-  cardNumber: string;
-  expiry: string;
-  cvv: string;
   customerPhone?: string;
 }
 

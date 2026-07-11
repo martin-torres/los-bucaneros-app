@@ -122,7 +122,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   const [kitchenLoading, setKitchenLoading] = useState(true);
   const [switcherExpanded, setSwitcherExpanded] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: '', address: '', street: '', colonia: '', addressDetails: '', cardNumber: '', expiry: '', cvv: '', customerPhone: ''
+    name: '', address: '', street: '', colonia: '', addressDetails: '', customerPhone: ''
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -283,9 +283,7 @@ const newOrder = await pb.collection('orders').create(formData);
         setCurrentOrder(newOrder);
        setCart([]);
        setPayWithAmount('');
-       setTransferFile(null);
-       // RESET CUSTOMER INFO FOR NEXT ORDER
-       setCustomerInfo({ name: '', address: '', street: '', colonia: '', addressDetails: '', cardNumber: '', expiry: '', cvv: '', customerPhone: '' });
+       setCustomerInfo({ name: '', address: '', street: '', colonia: '', addressDetails: '', customerPhone: '' });
        setActiveScreen('tracking');
     } catch (error) {
       console.error('Error creating order:', error);
