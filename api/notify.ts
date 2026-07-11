@@ -114,7 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // If only orderId was sent, fetch full record from PocketBase
     if ('orderId' in body && typeof body.orderId === 'string' && !('customerName' in body)) {
-      const pbUrl = process.env.VITE_POCKETBASE_URL || 'http://localhost:8090';
+      const pbUrl = process.env.POCKETBASE_URL || 'https://los-bucaneros-pb.fly.dev';
       const fetchResp = await fetch(`${pbUrl}/api/collections/orders/records/${body.orderId}`);
       if (!fetchResp.ok) {
         console.error('[notify] Failed to fetch order:', body.orderId);

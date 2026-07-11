@@ -17,7 +17,7 @@ const SECRET_FIELDS = ['telegramBotToken', 'telegramChatId', 'adminPin', 'kitche
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
-    const pbUrl = process.env.VITE_POCKETBASE_URL || 'http://localhost:8090';
+    const pbUrl = process.env.POCKETBASE_URL || 'https://los-bucaneros-pb.fly.dev';
 
     const resp = await fetch(`${pbUrl}/api/collections/restaurant_settings/records?perPage=1`);
     if (!resp.ok) {
