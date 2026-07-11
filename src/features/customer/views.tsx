@@ -820,11 +820,13 @@ export const TrackingView = ({
 }: any) => {
   const { t } = useTranslations();
   if (!currentOrder) return null;
-  const statusSteps: OrderStatus[] = ['recibido', 'preparando', 'listo', 'en_camino', 'entregado'];
+  const statusSteps: OrderStatus[] = ['pendiente_pago', 'recibido', 'preparando', 'listo', 'en_camino', 'entregado'];
   const currentIdx = statusSteps.indexOf(currentOrder.status);
 
   const getStatusText = () => {
     switch (currentOrder.status) {
+      case 'pendiente_pago':
+        return t('statusPendingPayment', 'Pago Pendiente');
       case 'recibido':
         return t('statusReceived', 'Pedido Recibido');
       case 'preparando':
@@ -848,6 +850,7 @@ export const TrackingView = ({
           style={{ backgroundColor: `${primaryColor}20`, borderColor: primaryColor }}
         >
           {currentOrder.status === 'recibido' && <Clock className="w-10 h-10" style={{ color: primaryColor }} />}
+          {currentOrder.status === 'pendiente_pago' && <Clock className="w-10 h-10" style={{ color: primaryColor }} />}
           {currentOrder.status === 'preparando' && <ChefHat className="w-10 h-10 animate-bounce" style={{ color: primaryColor }} />}
           {currentOrder.status === 'listo' && <CheckCircle2 className="w-10 h-10 text-green-600" />}
           {(currentOrder.status === 'en_camino' || currentOrder.status === 'entregado') && (

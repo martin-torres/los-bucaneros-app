@@ -64,6 +64,8 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
       .then((data) => setSettings(data))
       .catch((err) => {
         console.error('Error loading restaurant settings:', err);
+        // settings stays null → resolveUiSettings(null) returns defaults
+        // This is graceful degradation — app still works with sensible defaults
       })
       .finally(() => setSettingsLoading(false));
   }, []);
@@ -120,6 +122,7 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   const [kitchenUnlocked, setKitchenUnlocked] = useState(false);
   const [dashboardUnlocked, setDashboardUnlocked] = useState(false);
   const [kitchenLoading, setKitchenLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [switcherExpanded, setSwitcherExpanded] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '', address: '', street: '', colonia: '', addressDetails: '', customerPhone: ''
@@ -193,6 +196,8 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
   };
 
   const placeOrder = async (method: any) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const now = Date.now();
       
@@ -236,58 +241,26 @@ type CustomerScreen = 'landing' | 'menu' | 'cart' | 'checkout' | 'tracking';
         statusTimestamps: { recibido: now }
       };
 
-      const formData = new FormData();
-      formData.append('customerName', newOrderData.customerName);
-      formData.append('customerAddress', newOrderData.customerAddress);
-      if (newOrderData.customerColonia !== undefined) {
-        formData.append('customerColonia', newOrderData.customerColonia);
-      }
-      if (newOrderData.customerDetails !== undefined) {
-        formData.append('customerDetails', newOrderData.customerDetails);
-      }
-      if (newOrderData.changeAmount !== undefined) {
-        formData.append('changeAmount', newOrderData.changeAmount.toString());
-      }
-      formData.append('items', JSON.stringify(newOrderData.items));
-      formData.append('total', newOrderData.total.toString());
-      formData.append('status', newOrderData.status);
-      formData.append('paymentMethod', newOrderData.paymentMethod);
-      if (newOrderData.payWithAmount !== undefined) {
-        formData.append('payWithAmount', newOrderData.payWithAmount.toString());
-      }
-      if (newOrderData.transferScreenshot !== undefined) {
-        formData.append('transferScreenshot', newOrderData.transferScreenshot);
-      }
-      if (newOrderData.deliveryDistanceKm !== undefined) {
-        formData.append('deliveryDistanceKm', newOrderData.deliveryDistanceKm.toString());
-      }
-      if (newOrderData.deliveryFee !== undefined) {
-        formData.append('deliveryFee', newOrderData.deliveryFee.toString());
-      }
-      if (newOrderData.customerPhone) {
-        formData.append('customerPhone', newOrderData.customerPhone);
-      }
-      formData.append('timestamp', newOrderData.timestamp.toString());
-      formData.append('statusTimestamps', JSON.stringify(newOrderData.statusTimestamps));
+      const newOrder = await ordersApi.create(newOrderData);
 
-const newOrder = await pb.collection('orders').create(formData);
-        
-        await associateVisitorWithOrder(newOrder.id);
-       if (settings?.telegramNotificationsEnabled) {
-         fetch('/api/notify', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ orderId: newOrder.id })
-         }).catch(console.error);
-       }
-        setCurrentOrder(newOrder);
-       setCart([]);
-       setPayWithAmount('');
-       setCustomerInfo({ name: '', address: '', street: '', colonia: '', addressDetails: '', customerPhone: '' });
-       setActiveScreen('tracking');
+      await associateVisitorWithOrder(newOrder.id);
+      if (settings?.telegramNotificationsEnabled) {
+        fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: newOrder.id })
+        }).catch(console.error);
+      }
+      setCurrentOrder(newOrder);
+      setCart([]);
+      setPayWithAmount('');
+      setCustomerInfo({ name: '', address: '', street: '', colonia: '', addressDetails: '', customerPhone: '' });
+      setActiveScreen('tracking');
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Error al crear orden. Por favor intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -329,6 +302,8 @@ const newOrder = await pb.collection('orders').create(formData);
       });
     }).then((fn: any) => {
       unsubscribe = fn;
+    }).catch((err: unknown) => {
+      console.error('Kitchen subscription failed:', err);
     });
 
     return () => {
@@ -357,6 +332,8 @@ const newOrder = await pb.collection('orders').create(formData);
       }
     }).then((fn: any) => {
       unsubscribe = fn;
+    }).catch((err: unknown) => {
+      console.error('Tracking subscription failed:', err);
     });
 
     return () => {

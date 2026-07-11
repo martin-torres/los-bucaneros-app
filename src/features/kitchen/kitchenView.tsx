@@ -36,6 +36,15 @@ export const KitchenView = ({
   
   const safeOrders = Array.isArray(orders) ? orders : [];
   const activeOrders = safeOrders.filter((o: any) => o.status !== 'entregado');
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+    } catch (error) {
+      console.error('Kitchen: Failed to update status:', error);
+      alert('Error al actualizar el estado. Por favor intenta de nuevo.');
+    }
+  };
+
   
   return (
     <div className="h-full flex flex-col">
@@ -158,10 +167,11 @@ export const KitchenView = ({
                 )}
               </div>
               <div className="p-4 bg-gray-50 border-t-2 border-black">
-                {order.status === 'recibido' && <button onClick={() => updateOrderStatus(order.id, 'preparando')} className="w-full bg-black text-white py-4 rounded-xl font-black uppercase text-xs italic">{uiText?.kitchenAcceptLabel || 'Aceptar Comanda'}</button>}
-                {order.status === 'preparando' && <button onClick={() => updateOrderStatus(order.id, 'listo')} className="w-full text-black py-4 rounded-xl font-black uppercase text-xs italic" style={{ backgroundColor: primaryColor }}>{uiText?.kitchenCookedLabel || 'Marcar Cocinado'}</button>}
-                {order.status === 'listo' && <button onClick={() => updateOrderStatus(order.id, order.customerAddress === pickupLocationText ? 'entregado' : 'en_camino')} className={`w-full ${order.customerAddress === pickupLocationText ? 'bg-green-600' : 'bg-blue-500'} text-white py-4 rounded-xl font-black uppercase text-xs italic`}>{order.customerAddress === pickupLocationText ? (uiText?.kitchenDeliverCustomerLabel || 'Entregar Cliente') : (uiText?.kitchenSendRiderLabel || 'Enviar Moto')}</button>}
-                {order.status === 'en_camino' && <button onClick={() => updateOrderStatus(order.id, 'entregado')} className="w-full bg-green-500 text-white py-4 rounded-xl font-black uppercase text-xs italic">{uiText?.kitchenConfirmDeliveryLabel || 'Confirmar Entrega'}</button>}
+                {order.status === 'pendiente_pago' && <button onClick={() => handleStatusUpdate(order.id, 'recibido')} className="w-full bg-purple-600 text-white py-4 rounded-xl font-black uppercase text-xs italic">{uiText?.kitchenConfirmPaymentLabel || 'Verificar Pago'}</button>}
+                {order.status === 'recibido' && <button onClick={() => handleStatusUpdate(order.id, 'preparando')} className="w-full bg-black text-white py-4 rounded-xl font-black uppercase text-xs italic">{uiText?.kitchenAcceptLabel || 'Aceptar Comanda'}</button>}
+                {order.status === 'preparando' && <button onClick={() => handleStatusUpdate(order.id, 'listo')} className="w-full text-black py-4 rounded-xl font-black uppercase text-xs italic" style={{ backgroundColor: primaryColor }}>{uiText?.kitchenCookedLabel || 'Marcar Cocinado'}</button>}
+                {order.status === 'listo' && <button onClick={() => handleStatusUpdate(order.id, order.customerAddress === pickupLocationText ? 'entregado' : 'en_camino')} className={`w-full ${order.customerAddress === pickupLocationText ? 'bg-green-600' : 'bg-blue-500'} text-white py-4 rounded-xl font-black uppercase text-xs italic`}>{order.customerAddress === pickupLocationText ? (uiText?.kitchenDeliverCustomerLabel || 'Entregar Cliente') : (uiText?.kitchenSendRiderLabel || 'Enviar Moto')}</button>}
+                {order.status === 'en_camino' && <button onClick={() => handleStatusUpdate(order.id, 'entregado')} className="w-full bg-green-500 text-white py-4 rounded-xl font-black uppercase text-xs italic">{uiText?.kitchenConfirmDeliveryLabel || 'Confirmar Entrega'}</button>}
               </div>
             </div>
             );
