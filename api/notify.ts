@@ -110,11 +110,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ ok: true, note: 'Telegram not configured' });
     }
 
-    // Accept either a full order object or just an orderId
-    const order = body as unknown as OrderData;
+    let order: OrderData;
 
-    // If only orderId is provided, we'd need to fetch from PocketBase
-    // But for now, the frontend will send the full order data
+    // If only orderId was sent, fetch full record from PocketBase
+    if ('orderId' in body && typeof body.orderId === 'string' && !('customerName' in body)) {
+      const pbUrl = process.env.VITE_POCKETBASE_URL || 'http://localhost:8090';
+      const fetchResp = await fetch(`${pbUrl}/api/collections/orders/records/${body.orderId}`);
+      if (!fetchResp.ok) {
+        console.error('[notify] Failed to fetch order:', body.orderId);
+        return res.status(200).json({ ok: true, warning: 'Order not found' });
+      }
+      const raw: Record<string, unknown> = await fetchResp.json();
+      const rawItems = raw['items'];
+      order = {
+        id: String(raw['id'] || ''),
+        customerName: String(raw['customerName'] || 'Invitado'),
+        customerAddress: raw['customerAddress'] ? String(raw['customerAddress']) : undefined,
+        customerPhone: raw['customerPhone'] ? String(raw['customerPhone']) : undefined,
+        customerDetails: raw['customerDetails'] ? String(raw['customerDetails']) : undefined,
+        items: typeof rawItems === 'string' ? JSON.parse(rawItems) : (Array.isArray(rawItems) ? rawItems : []),
+        total: Number(raw['total'] || 0),
+        paymentMethod: String(raw['paymentMethod'] || ''),
+        payWithAmount: raw['payWithAmount'] ? Number(raw['payWithAmount']) : undefined,
+        changeAmount: raw['changeAmount'] !== undefined && raw['changeAmount'] !== null ? Number(raw['changeAmount']) : undefined,
+        deliveryFee: raw['deliveryFee'] ? Number(raw['deliveryFee']) : undefined,
+        status: raw['status'] ? String(raw['status']) : undefined,
+      };
+    } else {
+      order = body as unknown as OrderData;
+    }
+
     const message = formatOrderMessage(order);
 
     const telegramResp = await fetch(
