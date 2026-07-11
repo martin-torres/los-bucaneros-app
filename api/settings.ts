@@ -19,7 +19,29 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
   try {
     const pbUrl = process.env.POCKETBASE_URL || 'https://los-bucaneros-pb.fly.dev';
 
-    const resp = await fetch(`${pbUrl}/api/collections/restaurant_settings/records?perPage=1`);
+    // Authenticate as admin to read locked settings collection
+    const adminEmail = process.env.PB_ADMIN_EMAIL;
+    const adminPassword = process.env.PB_ADMIN_PASSWORD;
+    let authToken = '';
+
+    if (adminEmail && adminPassword) {
+      const authResp = await fetch(`${pbUrl}/api/collections/_superusers/auth-with-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: adminEmail, password: adminPassword }),
+      });
+      if (authResp.ok) {
+        const authData: Record<string, unknown> = await authResp.json();
+        authToken = String(authData['token'] || '');
+      }
+    }
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    const resp = await fetch(`${pbUrl}/api/collections/restaurant_settings/records?perPage=1`, { headers });
     if (!resp.ok) {
       return res.status(200).json({});
     }
@@ -45,11 +67,6 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       if (val !== undefined && val !== null) {
         filtered[field] = val;
       }
-    }
-
-    // Explicitly strip secrets
-    for (const field of SECRET_FIELDS) {
-      delete settings[field];
     }
 
     return res.status(200).json(filtered);

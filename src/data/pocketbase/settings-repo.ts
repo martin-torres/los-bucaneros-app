@@ -4,6 +4,20 @@ import { pbClient } from './client';
 
 export class PocketBaseSettingsRepository implements SettingsRepository {
   async get(): Promise<AppSkinSettings | null> {
+    // Try the Vercel API endpoint first (it strips secrets)
+    try {
+      const resp = await fetch('/api/settings');
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.name) {
+          return data as AppSkinSettings;
+        }
+      }
+    } catch {
+      // Fall through to direct PocketBase read
+    }
+
+    // Fallback: read directly from PocketBase (for local dev)
     try {
       const settings = await pbClient.collection('restaurant_settings').getFullList();
       if (settings.length === 0) {
